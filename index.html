@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iQ Navigation Panel</title>
+    <!-- Tailwind CSS for utility-first styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter font for the entire application -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base styling for the page */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F6F7F9;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- Design System Color Placeholders (For clarity) --- */
+        .bg-Web-Fill-Navigation-Default { background-color: #192129; }
+        .text-Web-Text-Navigation-Default { color: #9ca3af; } /* Example: Gray-400 */
+        .text-Web-Text-Navigation-Selected { color: #ffffff; } /* Example: White */
+        .bg-Web-Fill-Navigation-Selected { background-color: #2D3943; }
+        .border-Web-Border-Container-Primary { border-color: #4b5563; } /* Example: Gray-600 */
+        .bg-Web-Text-Static-Inverse { background-color: #f9fafb; } /* Example: Gray-50 (for logo placeholder) */
+
+        /* --- Minimal CSS for state transitions and overrides --- */
+        .nav-item {
+            transition: background-color 0.2s ease;
+            min-height: 60px; /* Ensure items have enough height for two lines */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Hover state for navigation items */
+        .nav-item:not([data-selected="true"]):hover {
+            background-color: #252f3a; /* Hover background */
+        }
+        .nav-item:not([data-selected="true"]):hover .text-Web-Text-Navigation-Default {
+            color: #d1d5db; /* Lighter gray text on hover */
+        }
+        .nav-item:not([data-selected="true"]):hover .icon-default {
+            stroke: #d1d5db; /* Lighter gray icon on hover */
+        }
+
+        /* Selected state styling */
+        .nav-item[data-selected="true"] {
+            background-color: var(--bg-Web-Fill-Navigation-Selected, #2D3943); /* Selected background */
+        }
+        .nav-item[data-selected="true"] .text-Web-Text-Navigation-Default {
+            color: var(--text-Web-Text-Navigation-Selected, #ffffff); /* Selected text color */
+            font-weight: 600; /* Bolder text for selected item */
+        }
+        .nav-item[data-selected="true"] .icon-default {
+            stroke: var(--text-Web-Text-Navigation-Selected, #ffffff); /* Selected icon color */
+        }
+
+        /* Default icon color */
+        .nav-item .icon-default {
+            stroke: var(--text-Web-Text-Navigation-Default, #9ca3af);
+        }
+
+        /* Account menu styling */
+        .account-menu {
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        
+        /* User Profile Page specific styles */
+        .profile-nav-item {
+            transition: background-color 0.2s ease;
+        }
+        .profile-nav-item.active, .profile-nav-item:hover {
+            background-color: #2D3943;
+        }
+        
+        .rate-card-grid {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+        
+        .platform-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .platform-disabled:hover {
+            background-color: transparent !important;
+        }
+
+        /* Custom scrollbar for pop-outs */
+        .custom-scrollbar-dark::-webkit-scrollbar {
+          width: 8px;
+        }
+        .custom-scrollbar-dark::-webkit-scrollbar-track {
+          background: #2d3943;
+          border-radius: 4px;
+        }
+        .custom-scrollbar-dark::-webkit-scrollbar-thumb {
+          background-color: #4b5563;
+          border-radius: 4px;
+        }
+        
+        .custom-scrollbar-light::-webkit-scrollbar {
+          width: 8px;
+        }
+        .custom-scrollbar-light::-webkit-scrollbar-track {
+          background: #e5e7eb;
+          border-radius: 4px;
+        }
+        .custom-scrollbar-light::-webkit-scrollbar-thumb {
+          background-color: #9ca3af;
+          border-radius: 4px;
+        }
+
+    </style>
+</head>
+<body class="bg-white">
+
+    <!-- Initial Login View -->
+    <div id="loginView" class="w-full h-screen flex items-center justify-center bg-gray-800" style="background-image: url('https://placehold.co/1920x1080/374151/4B5563?text=Map+Texture'); background-size: cover;">
+        <div id="loginBox" class="bg-white p-8 rounded-lg shadow-lg w-96">
+            <div class="flex justify-center mb-6">
+                 <div class="text-3xl font-bold flex items-center"><span class="bg-blue-600 text-white px-2 py-1 rounded-md mr-1">D</span><span class="bg-blue-600 text-white px-2 py-1 rounded-md mr-1">A</span><span class="bg-blue-600 text-white px-2 py-1 rounded-md">T</span><span class="ml-2 text-2xl font-semibold">Freight & Analytics</span></div>
+            </div>
+            <h2 class="text-2xl font-bold text-center mb-2">Log In</h2>
+            <p class="text-center text-gray-500 mb-6">To continue to your DAT account</p>
+            <form id="loginForm">
+                 <div class="mb-4">
+                    <label for="email" class="text-sm font-medium text-gray-700">Email address*</label>
+                    <input type="email" id="email" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" value="john.doe1@email.com" required>
+                </div>
+                 <div class="mb-6">
+                    <label for="password" class="text-sm font-medium text-gray-700">Password*</label>
+                    <input type="password" id="password" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" value="************" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Continue</button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Main App View -->
+    <div id="mainAppView" class="hidden flex w-full h-screen relative">
+        <div class="relative flex-shrink-0">
+            <!-- Main navigation container -->
+            <div id="mainNavContainer" class="w-20 h-full pt-6 bg-Web-Fill-Navigation-Default flex flex-col items-center">
+                <!-- Nav content is rendered here by JS -->
+            </div>
+
+            <!-- Account Menu (Initially Hidden) -->
+            <div id="accountMenu" class="hidden absolute left-full ml-2 bottom-4 w-80 bg-[#192129] text-white rounded-md account-menu z-20">
+                 <div id="accountMenuCurrentUser"></div>
+                 <div class="p-2 border-b border-gray-700">
+                    <div class="relative">
+                        <input type="text" id="accountSearchInput" placeholder="Search accounts..." class="w-full bg-[#2D3943] text-white rounded-md py-1.5 pl-8 pr-8 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <i data-lucide="search" class="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                        <button id="clearSearchButton" class="hidden absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-gray-600">
+                            <i data-lucide="x" class="w-4 h-4 text-gray-400"></i>
+                        </button>
+                    </div>
+                 </div>
+                 <div id="accountList" class="py-2 border-b border-gray-700 max-h-96 overflow-y-auto custom-scrollbar-dark"></div>
+                <div class="border-t border-gray-700 py-2"><a href="#" id="logoutButton" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Log Out</a></div>
+            </div>
+            
+             <!-- User Info Popup (Initially Hidden) -->
+            <div id="userInfoPopup" class="hidden absolute bg-[#2D3943] text-white rounded-md shadow-lg p-3 border border-gray-600 z-30 w-[450px]"></div>
+
+            <!-- Platform Switcher Menu -->
+            <div id="platformSwitcherMenu" class="hidden absolute w-64 bg-[#192129] text-white rounded-md account-menu z-30">
+                <div class="py-2">
+                    <a href="#" data-platform="iQ" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">DAT iQ</a>
+                    <a href="#" data-platform="One" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">DAT One</a>
+                    <div class="flex justify-between items-center px-4 py-2 text-sm text-gray-500 cursor-not-allowed">
+                        <span>Outgo</span>
+                        <span class="text-xs bg-gray-600 px-2 py-0.5 rounded-full">Coming Soon</span>
+                    </div>
+                    <div class="flex justify-between items-center px-4 py-2 text-sm text-gray-500 cursor-not-allowed">
+                        <span>Trucker Tools</span>
+                         <span class="text-xs bg-gray-600 px-2 py-0.5 rounded-full">Coming Soon</span>
+                    </div>
+                </div>
+                 <div class="border-t border-gray-700 py-2">
+                    <a href="#" id="platformAccountInfoLink" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">
+                        <i data-lucide="user" class="w-5 h-5 mr-3"></i> Account Information
+                    </a>
+                </div>
+            </div>
+
+        </div>
+        <main id="pageContent" class="flex-1 h-full overflow-y-auto bg-gray-50 relative">
+            <div id="dynamic-dashboard-content">
+                <!-- Page content (Dashboard or other pages) will be rendered here -->
+            </div>
+             <div id="pageOverlay" class="hidden absolute inset-0 bg-gray-900 bg-opacity-50 z-10"></div>
+        </main>
+    </div>
+    
+    <!-- User Profile View (Initially Hidden) -->
+    <div id="userProfileView" class="hidden w-full h-screen">
+        <div class="flex h-full relative">
+            <!-- Profile Navigation -->
+            <div class="w-64 h-full bg-Web-Fill-Navigation-Default text-white flex flex-col flex-shrink-0">
+                <div id="backToApp" class="px-6 py-4 border-b border-gray-700 cursor-pointer"><div class="text-2xl font-bold flex items-center"><span class="bg-blue-600 text-white px-2 py-1 rounded-md mr-1">D</span><span class="bg-blue-600 text-white px-2 py-1 rounded-md mr-1">A</span><span class="bg-blue-600 text-white px-2 py-1 rounded-md">T</span></div><h2 class="text-2xl font-semibold mt-1">Account</h2></div>
+                <div id="profileNavHeader" class="px-6 py-4 border-b border-gray-700 cursor-pointer"></div>
+                <nav class="flex-1 px-2 py-4"><div class="space-y-1"><a href="#" class="profile-nav-item active flex items-center px-4 py-2 rounded-md"><i data-lucide="user" class="w-5 h-5 mr-3"></i> User Profile</a><a href="#" class="profile-nav-item flex items-center px-4 py-2 rounded-md"><i data-lucide="search" class="w-5 h-5 mr-3"></i> Company Profile</a><a href="#" class="profile-nav-item flex items-center px-4 py-2 rounded-md"><i data-lucide="star" class="w-5 h-5 mr-3"></i> Manage Reputation</a></div><div class="border-t border-gray-700 my-2"></div><div class="space-y-1"><a href="#" id="toolsLink" class="profile-nav-item flex items-center px-4 py-2 rounded-md"><i data-lucide="grid" class="w-5 h-5 mr-3"></i> Tools</a><a href="#" class="profile-nav-item flex items-center px-4 py-2 rounded-md"><i data-lucide="message-circle" class="w-5 h-5 mr-3"></i> Help Center</a><a href="#" class="profile-nav-item flex items-center px-4 py-2 rounded-md"><i data-lucide="message-square" class="w-5 h-5 mr-3"></i> Live Support</a></div></nav>
+                <div class="px-4 py-2 mt-auto border-t border-gray-700"><a href="#" class="flex items-center text-sm text-gray-400 hover:text-white py-1"><i data-lucide="shield" class="w-5 h-5 mr-3"></i> Privacy Policy</a><a href="#" class="flex items-center text-sm text-gray-400 hover:text-white py-1"><i data-lucide="file-text" class="w-5 h-5 mr-3"></i> Terms and Conditions</a><a href="#" class="flex items-center text-sm text-gray-400 hover:text-white py-2 mt-2"><i data-lucide="log-out" class="w-5 h-5 mr-3"></i> Sign Out</a></div>
+            </div>
+            
+             <!-- Profile Account Menu (Initially Hidden) -->
+            <div id="profileAccountMenu" class="hidden absolute top-0 left-0 w-80 bg-[#192129] text-white rounded-md account-menu z-20">
+                 <div id="profileAccountMenuCurrentUser"></div>
+                 <div class="p-2 border-b border-gray-700">
+                    <div class="relative">
+                        <input type="text" id="profileAccountSearchInput" placeholder="Search accounts..." class="w-full bg-[#2D3943] text-white rounded-md py-1.5 pl-8 pr-8 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <i data-lucide="search" class="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                        <button id="profileClearSearchButton" class="hidden absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-gray-600">
+                            <i data-lucide="x" class="w-4 h-4 text-gray-400"></i>
+                        </button>
+                    </div>
+                 </div>
+                 <div id="profileAccountList" class="py-2 border-b border-gray-700 max-h-96 overflow-y-auto custom-scrollbar-dark"></div>
+                <div class="border-t border-gray-700 py-2"><a href="#" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Manage Accounts</a></div>
+            </div>
+
+            <!-- Profile Content -->
+            <main id="profileContent" class="flex-1 p-8 bg-[#F6F7F9] overflow-y-auto"></main>
+        </div>
+    </div>
+
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => { 
+            lucide.createIcons();
+            // --- Data ---
+            let users = [];
+            
+            function getInitials(name) {
+                const words = name.split(' ');
+                if (words.length > 1) {
+                    return `${words[0][0]}${words[1][0]}`.toUpperCase();
+                }
+                return name.substring(0, 2).toUpperCase();
+            }
+
+            const accountData = [
+                { id: 1, company: 'Bahamas Trucking', platform: 'One', isAdmin: false, color: 'bg-blue-500' },
+                { id: 2, company: 'Midwest Trucking', platform: 'One', isAdmin: false, color: 'bg-green-500' },
+                { id: 3, company: 'Lonestar Trucking', platform: 'One', isAdmin: false, color: 'bg-purple-500' },
+                { id: 4, company: "Paul's iQ Account", platform: 'iQ', isAdmin: true, color: 'bg-gray-500' }
+            ];
+
+             users = accountData.map((acc) => {
+                const company = acc.company;
+                 return {
+                    id: acc.id,
+                    platform: acc.platform,
+                    name: `John Doe${acc.id}`,
+                    isAdmin: acc.isAdmin,
+                    initials: getInitials(company),
+                    fName: 'John',
+                    lName: `Doe${acc.id}`,
+                    email: `john.doe${acc.id}@email.com`,
+                    phone: `555-555-${String(1000 + acc.id).padStart(4, '0')}`,
+                    contactEmail: `contact.doe${acc.id}@email.com`,
+                    contactAlternatePhone: `555-555-${String(2000+acc.id).padStart(4, '0')}`,
+                    color: acc.color,
+                    company: company,
+                    location: ['Nassau, BS', 'Chicago, IL', 'Austin, TX', 'Portland, OR'][acc.id-1],
+                    officeCode: `CODE-${acc.id}`,
+                    nickname: '',
+                    roles: [],
+                    mcDotNumber: `MC-${String(100000 + acc.id).padStart(6, '0')}`,
+                    subscriptions: [acc.platform],
+                };
+            });
+
+            let currentUser = users[0];
+            let globalDisplayPrefs = { company: false, location: false, officeCode: false, nickname: false };
+            let currentNavType = 'iQ';
+            let infoPopupTimeout;
+
+            // --- DOM Elements ---
+            const loginView = document.getElementById('loginView');
+            const loginForm = document.getElementById('loginForm');
+            
+            const mainNavContainer = document.getElementById('mainNavContainer');
+            const accountMenu = document.getElementById('accountMenu');
+            const accountMenuCurrentUser = document.getElementById('accountMenuCurrentUser');
+            const accountList = document.getElementById('accountList');
+            const mainAppView = document.getElementById('mainAppView');
+            const userProfileView = document.getElementById('userProfileView');
+            const pageContent = document.getElementById('pageContent');
+            const dynamicDashboardContent = document.getElementById('dynamic-dashboard-content');
+            const pageOverlay = document.getElementById('pageOverlay');
+            const platformSwitcherMenu = document.getElementById('platformSwitcherMenu');
+            const userInfoPopup = document.getElementById('userInfoPopup');
+            
+            const backToApp = document.getElementById('backToApp');
+            const profileNavHeader = document.getElementById('profileNavHeader');
+            const profileContent = document.getElementById('profileContent');
+            const profileAccountMenu = document.getElementById('profileAccountMenu');
+            const profileAccountMenuCurrentUser = document.getElementById('profileAccountMenuCurrentUser');
+            const profileAccountList = document.getElementById('profileAccountList');
+            const profileAccountSearchInput = document.getElementById('profileAccountSearchInput');
+            const profileClearSearchButton = document.getElementById('profileClearSearchButton');
+
+            const toolsLink = document.getElementById('toolsLink');
+            const accountSearchInput = document.getElementById('accountSearchInput');
+            const clearSearchButton = document.getElementById('clearSearchButton');
+            
+
+            // --- Functions ---
+            
+            function getUserDisplay(user, isLogin=false) {
+                const platformLabel = `<span class="text-xs font-normal ${isLogin ? 'text-gray-400' : 'text-gray-400'} ml-2">${user.platform}</span>`;
+                const adminLabel = user.isAdmin ? ` <span class="text-xs font-normal ${isLogin ? 'text-gray-400' : 'text-gray-400'} ml-1">- A</span>` : '';
+                let details = `<p class="font-semibold text-base flex items-center">${user.company}${platformLabel}${adminLabel}</p>`;
+                 if (globalDisplayPrefs.location) details += `<p class="text-xs ${isLogin ? 'text-gray-500' : 'text-gray-400'}">${user.location}</p>`;
+                if (globalDisplayPrefs.officeCode) details += `<p class="text-xs ${isLogin ? 'text-gray-500' : 'text-gray-400'}">${user.officeCode}</p>`;
+                if (globalDisplayPrefs.nickname && user.nickname) details += `<p class="text-xs ${isLogin ? 'text-gray-500' : 'text-gray-400'} italic">"${user.nickname}"</p>`;
+                return `<div>${details}</div>`;
+            }
+            
+            function renderInfoPopup(user) {
+                userInfoPopup.innerHTML = `
+                    <h4 class="font-bold text-sm mb-2 border-b border-gray-600 pb-1">${user.name}</h4>
+                    <div class="grid grid-cols-2 gap-x-4 text-xs">
+                        <div>
+                            <p class="font-semibold text-gray-400">Username:</p> <p>${user.name}</p>
+                            <p class="font-semibold text-gray-400 mt-2">Email:</p> <p>${user.email}</p>
+                            <p class="font-semibold text-gray-400 mt-2">Roles:</p> <p>${user.roles.length > 0 ? user.roles.join(', ') : 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-400">Account Name:</p> <p>${user.company}</p>
+                            <p class="font-semibold text-gray-400 mt-2">MC/DOT Number:</p> <p>${user.mcDotNumber}</p>
+                            <p class="font-semibold text-gray-400 mt-2">Subscriptions:</p> <p>${user.subscriptions.join(', ')}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function renderAccessDeniedMessage() {
+                return `
+                    <div id="accessDeniedMessage" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 z-20">
+                        <div class="text-center p-8">
+                            <i data-lucide="lock" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
+                            <h2 class="text-2xl font-bold text-gray-800">You need access</h2>
+                            <p class="mt-2 text-gray-500">Switch to an account with access or select an available platform from the "More Tools" menu.</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            function renderOneDashboard() {
+                dynamicDashboardContent.innerHTML = `
+                    <div class="p-8 flex gap-8">
+                        <div class="flex-1 space-y-6">
+                            <header class="flex justify-between items-center">
+                                <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+                            </header>
+                            <div class="flex items-center gap-2 border-b pb-4">
+                                <button class="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 border rounded-md hover:bg-gray-200">POST A SHIPMENT</button>
+                                <button class="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 border rounded-md hover:bg-gray-200">SEARCH TRUCKS</button>
+                                <button class="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 border rounded-md hover:bg-gray-200">POST A TRUCK</button>
+                                <button class="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 border rounded-md hover:bg-gray-200">SEARCH LOADS</button>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm">
+                                <h2 class="text-lg font-semibold text-gray-800 mb-4">Get Started</h2>
+                                <div class="grid grid-cols-3 gap-4">
+                                    ${[...Array(3)].map(() => `
+                                    <div class="space-y-2">
+                                        <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden relative">
+                                            <img src="https://placehold.co/300x170/192129/FFFFFF?text=DAT+One" class="w-full h-full object-cover" alt="Video Thumbnail">
+                                            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                                                <button class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white"><i data-lucide="play" class="w-6 h-6 fill-current"></i></button>
+                                            </div>
+                                        </div>
+                                        <h3 class="font-semibold text-sm">How to post a shipment</h3>
+                                    </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm">
+                                <h2 class="text-lg font-semibold text-gray-800 mb-2">Help Center</h2>
+                                <p class="text-sm text-gray-500 mb-4">Contact information, troubleshooting, FAQ's and training videos.</p>
+                                <a href="#" class="text-sm font-semibold text-blue-600 hover:underline">HELP CENTER ></a>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-sm flex items-center gap-6">
+                                <img src="https://placehold.co/100x200/cccccc/333333?text=Mobile" class="h-40 w-20 object-cover rounded-lg" alt="Mobile App">
+                                <div>
+                                    <h2 class="text-lg font-semibold text-gray-800 mb-2">DAT One Mobile</h2>
+                                    <p class="text-sm text-gray-500 mb-4">Combining the best tracking tools into one app.</p>
+                                    <a href="#" class="text-sm font-semibold text-blue-600 hover:underline">GET THE APP ></a>
+                                </div>
+                                <div class="ml-auto border-l pl-6">
+                                    <h3 class="font-semibold text-gray-800 mb-2">What's New</h3>
+                                    <p class="text-sm text-gray-500 mb-4">Product updates at a glance - check out what's new.</p>
+                                    <a href="#" class="text-sm font-semibold text-blue-600 hover:underline">VIEW UPDATES ></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-80 flex-shrink-0 bg-white p-6 rounded-lg shadow-sm">
+                            <h2 class="text-lg font-semibold text-gray-800 mb-2">National Trucks Count</h2>
+                            <p class="text-xs text-gray-500 mb-4">refreshed at 8:07 AM</p>
+                            <select class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 mb-4">
+                                <option selected>Van (Standard)</option>
+                            </select>
+                            <div class="space-y-2 text-sm">
+                                ${['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'IA', 'ID', 'IL', 'IN'].map(st => `
+                                <div class="flex items-center">
+                                    <span class="w-8 font-mono">${st}</span>
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5 mx-2">
+                                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${Math.random()*80+10}%"></div>
+                                    </div>
+                                </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+
+            function renderIQDashboard() {
+                dynamicDashboardContent.innerHTML = `
+                    <div class="p-8">
+                        <header class="flex justify-between items-center mb-6">
+                            <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+                            <div class="flex items-center gap-2">
+                                <label for="equipment-type" class="text-sm font-medium text-gray-700">Equipment Type:</label>
+                                <select id="equipment-type" name="equipment-type" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
+                                    <option selected>Van</option>
+                                    <option value="FR">Flatbed</option>
+                                    <option value="RF">Reefer</option>
+                                </select>
+                            </div>
+                        </header>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="lg:col-span-2 space-y-6">
+                                <!-- National Rate Card -->
+                                <div class="bg-white p-6 rounded-lg shadow-sm">
+                                    <h2 class="text-lg font-semibold text-gray-800 mb-1">National Rate</h2>
+                                    <p class="text-xs text-gray-500 mb-4">Updated 01/2025</p>
+                                    <div class="grid gap-4 rate-card-grid">
+                                        <div>
+                                            <p class="text-sm text-gray-500">Broker Spot Rate</p>
+                                            <p class="text-2xl font-bold text-gray-800">$1.63 <span class="text-sm font-normal text-red-500">(-$0.02)</span></p>
+                                            <p class="text-xs text-gray-400">Rate is decreasing</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-gray-500">Shipper Spot Rate</p>
+                                            <p class="text-2xl font-bold text-gray-800">$1.86 <span class="text-sm font-normal text-red-500">(-$0.02)</span></p>
+                                            <p class="text-xs text-gray-400">Rate is increasing</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-gray-500">Shipper Contract Rate</p>
+                                            <p class="text-2xl font-bold text-gray-800">$1.95 <span class="text-sm font-normal text-red-500">(-$0.06)</span></p>
+                                            <p class="text-xs text-gray-400">Rate is decreasing</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-gray-500">Fuel Surcharge</p>
+                                            <p class="text-2xl font-bold text-gray-800">$0.41 <span class="text-sm font-normal text-gray-500">($0.00)</span></p>
+                                            <p class="text-xs text-gray-400">Rate is neutral</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Chart Card -->
+                                <div class="bg-white p-6 rounded-lg shadow-sm">
+                                    <div class="flex justify-end mb-4">
+                                        <div class="flex text-sm text-gray-500 border rounded-md">
+                                            <button class="px-3 py-1 hover:bg-gray-100 rounded-l-md">3M</button>
+                                            <button class="px-3 py-1 hover:bg-gray-100 border-l">6M</button>
+                                            <button class="px-3 py-1 bg-gray-100 font-semibold text-gray-800 border-l rounded-r-md">1Y</button>
+                                        </div>
+                                    </div>
+                                    <svg viewBox="0 0 800 400" class="w-full h-auto">
+                                        <!-- Chart content drawn here -->
+                                        <line x1="50" y1="350" x2="780" y2="350" stroke="#d1d5db" />
+                                        <line x1="50" y1="50" x2="50" y2="350" stroke="#d1d5db" />
+                                        <polyline points="70,200 140,190 210,195 280,185 350,190 420,180 490,185 560,175 630,180 700,175 770,180" fill="none" stroke="#3b82f6" stroke-width="2"/>
+                                        <polyline points="70,250 140,240 210,245 280,235 350,240 420,230 490,235 560,225 630,230 700,225 770,230" fill="none" stroke="#ef4444" stroke-width="2"/>
+                                        <polyline points="70,300 140,290 210,295 280,285 350,290 420,280 490,285 560,275 630,280 700,275 770,280" fill="none" stroke="#f59e0b" stroke-width="2"/>
+                                    </svg>
+                                    <div class="flex justify-center flex-wrap gap-4 mt-4 text-xs">
+                                        <label class="flex items-center"><input type="checkbox" checked class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500"> <span class="ml-2">Broker Spot</span></label>
+                                        <label class="flex items-center"><input type="checkbox" checked class="h-4 w-4 rounded text-orange-500 focus:ring-orange-500"> <span class="ml-2">Broker Spot without Fuel</span></label>
+                                        <label class="flex items-center"><input type="checkbox" checked class="h-4 w-4 rounded text-red-600 focus:ring-red-500"> <span class="ml-2">Shipper Spot</span></label>
+                                        <label class="flex items-center"><input type="checkbox" checked class="h-4 w-4 rounded text-indigo-600 focus:ring-indigo-500"> <span class="ml-2">Shipper Spot without Fuel</span></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="space-y-6">
+                                <!-- State and Regional Downloads -->
+                                <div class="bg-white p-6 rounded-lg shadow-sm">
+                                    <h3 class="font-semibold text-gray-800 mb-2">State and Regional Downloads</h3>
+                                    <p class="text-xs text-gray-500 mb-4">Timeframe: 30 Day | With DAT fuel surcharge ($0.41)</p>
+                                    <div class="space-y-2 text-sm">
+                                        <p class="font-semibold text-gray-700">State</p>
+                                        <a href="#" class="text-blue-600 hover:underline">BROKER SPOT <i data-lucide="download-cloud" class="inline w-4 h-4"></i></a>
+                                        <a href="#" class="text-blue-600 hover:underline ml-2">SHIPPER CONTRACT <i data-lucide="download-cloud" class="inline w-4 h-4"></i></a>
+                                        <p class="font-semibold text-gray-700 mt-2">Regional</p>
+                                        <a href="#" class="text-blue-600 hover:underline">BROKER SPOT <i data-lucide="download-cloud" class="inline w-4 h-4"></i></a>
+                                        <a href="#" class="text-blue-600 hover:underline ml-2">SHIPPER CONTRACT <i data-lucide="download-cloud" class="inline w-4 h-4"></i></a>
+                                    </div>
+                                </div>
+                                <!-- DAT Weekly Update -->
+                                <div class="bg-white p-6 rounded-lg shadow-sm">
+                                    <h3 class="font-semibold text-gray-800 mb-4">DAT Weekly Update</h3>
+                                    <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden relative">
+                                        <img src="https://placehold.co/600x400/192129/FFFFFF?text=DAT+iQ+Market+Update" class="w-full h-full object-cover" alt="Market Update Video Thumbnail">
+                                        <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                                            <button class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-white"><i data-lucide="play" class="w-8 h-8 fill-current"></i></button>
+                                        </div>
+                                    </div>
+                                    <button class="mt-4 w-full bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 text-sm font-medium">Watch on <span class="font-bold">YouTube</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+
+            function renderPageContent() {
+                if (currentNavType === 'One') {
+                    renderOneDashboard();
+                } else {
+                    renderIQDashboard();
+                }
+
+                const existingMessage = dynamicDashboardContent.querySelector('#accessDeniedMessage');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
+                pageOverlay.classList.toggle('hidden', currentUser.platform.includes(currentNavType));
+
+                if (!currentUser.platform.includes(currentNavType)) {
+                    dynamicDashboardContent.insertAdjacentHTML('beforeend', renderAccessDeniedMessage());
+                    lucide.createIcons();
+                }
+            }
+
+            function renderNav() {
+                const isOne = (currentNavType === 'One');
+                mainNavContainer.classList.toggle('w-64', isOne);
+                mainNavContainer.classList.toggle('w-20', !isOne);
+                
+                const bentoButtonHtml = isOne ? 
+                    `<a href="#" id="bentoButton" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md text-sm text-gray-300"><i data-lucide="layout-grid" class="w-5 h-5 mr-3"></i> More Tools</a>` :
+                    `<div id="bentoButton" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="layout-grid" class="w-6 h-6 text-gray-400 hover:text-white"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">More Tools</div></div>`;
+                
+                const divider = isOne ? `<div class="w-full border-t border-gray-600 my-2"></div>` : `<div class="w-16 border-t border-gray-600 my-1"></div>`;
+                 const supportLinks = isOne ? `
+                    <div class="w-full border-t border-gray-700 my-2"></div>
+                    <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="message-square" class="w-5 h-5 mr-3"></i> Live Support</a>
+                    <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="book-open" class="w-5 h-5 mr-3"></i> Help Center</a>
+                ` : `
+                    <div class="w-16 border-t border-gray-600 my-1"></div>
+                    <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="message-square" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">Live Support</div></div>
+                    <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="book-open" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">Help Center</div></div>
+                `;
+
+                const navItems = isOne ? `
+                    <div id="logoButton" class="self-stretch px-2 mb-6 flex justify-center"><div class="w-auto h-12 bg-white rounded flex items-center justify-center text-gray-800 font-bold text-sm px-4"><div>DAT <span class="font-extrabold text-lg">One Freight</span></div></div></div>
+                    ${bentoButtonHtml}
+                    ${divider}
+                    <div class="self-stretch flex-1 flex flex-col items-start w-full text-sm text-gray-300">
+                        <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="home" class="w-5 h-5 mr-3"></i> Dashboard</a>
+                        <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="search" class="w-5 h-5 mr-3"></i> Search Loads</a>
+                        <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="truck" class="w-5 h-5 mr-3"></i> Search Trucks</a>
+                        <div class="w-full border-t border-gray-700 my-2"></div>
+                        <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="download" class="w-5 h-5 mr-3"></i> My Shipments</a>
+                        <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="settings" class="w-5 h-5 mr-3"></i> Advanced Posting</a>
+                        <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="truck" class="w-5 h-5 mr-3"></i> My Trucks</a>
+                        <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="package" class="w-5 h-5 mr-3"></i> My Loads</a>
+                        ${supportLinks}
+                    </div>
+                ` : `
+                    <div id="logoButton" class="self-stretch px-2 mb-6 flex justify-center"><div class="w-16 h-12 bg-white rounded flex flex-col items-center justify-center text-gray-800 font-bold text-sm"><div>DAT</div><div class="font-extrabold text-lg">iQ</div></div></div>
+                    ${bentoButtonHtml}
+                    ${divider}
+                    <div class="self-stretch flex-1 flex flex-col items-start gap-2" id="navContainer">
+                        <div data-selected="true" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="home" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">Dashboard</div></div>
+                        <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="wrench" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">RateView</div></div>
+                        <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="file-text" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">Rateview<br>Multi-Lane</div></div>
+                        <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="clipboard-list" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">RFP Tool</div></div>
+                        <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="clock" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">Market<br>Conditions</div></div>
+                        <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="bar-chart-3" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">Benchmark</div></div>
+                         ${supportLinks}
+                    </div>
+                `;
+                
+                mainNavContainer.innerHTML = navItems + `<div class="self-stretch mt-auto flex flex-col items-center"><div class="self-stretch border-t border-Web-Border-Container-Primary flex justify-center py-4"><div id="avatarButton" class="w-10 h-10 ${currentUser.color} rounded-full flex items-center justify-center text-white text-sm font-medium cursor-pointer">${currentUser.initials}</div></div></div>`;
+                
+                lucide.createIcons();
+            }
+
+            function updateAccountList(searchTerm, listElement, currentUserElement, isLogin = false) {
+                const lowerCaseSearchTerm = searchTerm ? searchTerm.toLowerCase() : '';
+                
+                const filteredUsers = searchTerm ? users.filter(user => 
+                    user.name.toLowerCase().includes(lowerCaseSearchTerm) ||
+                    user.company.toLowerCase().includes(lowerCaseSearchTerm) ||
+                    user.email.toLowerCase().includes(lowerCaseSearchTerm) ||
+                    user.roles.some(role => role.toLowerCase().includes(lowerCaseSearchTerm)) ||
+                    user.subscriptions.some(sub => sub.toLowerCase().includes(lowerCaseSearchTerm)) ||
+                    user.mcDotNumber.toLowerCase().includes(lowerCaseSearchTerm)
+                ) : users;
+
+                if(currentUserElement) {
+                    const currentUserHtml = `<div class="px-4 py-3 border-b ${isLogin ? 'border-gray-200' : 'border-gray-700'}"><div class="flex items-center"><div class="w-8 h-8 mr-3 ${currentUser.color} rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0">${currentUser.initials}</div>${getUserDisplay(currentUser, isLogin)}</div></div>`;
+                    currentUserElement.innerHTML = currentUserHtml;
+                }
+
+                const itemClasses = isLogin ? 'text-gray-800 hover:bg-gray-100' : 'text-gray-300 hover:bg-gray-700 hover:text-white';
+                const iconClasses = isLogin ? 'text-gray-500 hover:text-gray-800' : 'text-gray-500 hover:text-white';
+
+                const otherUsersHtml = filteredUsers.filter(u => u.id !== currentUser.id || isLogin)
+                    .map(u => {
+                        return `<div data-id="${u.id}" class="flex items-center px-4 py-2 text-sm ${itemClasses} cursor-pointer"><div class="w-8 h-8 mr-3 ${u.color} rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0">${u.initials}</div><div class="flex-1">${getUserDisplay(u, isLogin)}</div><div class="relative info-icon-container"><i data-lucide="info" class="w-4 h-4 ml-2 ${iconClasses}"></i></div></div>`
+                    }).join('');
+
+                listElement.innerHTML = otherUsersHtml;
+                lucide.createIcons();
+            }
+
+
+            function renderUserProfile() {
+                const adminLabel = currentUser.isAdmin ? ' <span class="text-base font-normal text-gray-500">- Admin</span>' : '';
+                profileNavHeader.innerHTML = `<div class="flex items-center"><div class="w-12 h-12 ${currentUser.color} rounded-full flex items-center justify-center text-white text-lg font-medium mr-3 flex-shrink-0">${currentUser.initials}</div>${getUserDisplay(currentUser)}</div>`;
+                
+                profileContent.innerHTML = `
+                    <header class="flex justify-between items-center mb-6"><h1 id="profilePageTitle" class="text-2xl font-bold text-gray-800">${currentUser.name}${adminLabel}</h1><p class="text-sm text-gray-500">Last Updated: Aug 25, 2025, by DAT</p></header>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="bg-white p-6 rounded-lg shadow-md">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">User Details</h3>
+                                <div class="bg-blue-50 p-4 rounded-md text-blue-800 text-sm mb-6"><i data-lucide="info" class="inline w-4 h-4 mr-2"></i>To request changes to this section, contact DAT Support at (800) 541-5417.</div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                     <div><label class="text-xs text-gray-500">First Name:</label><p class="text-gray-800 mt-1">${currentUser.fName}</p></div>
+                                     <div><label class="text-xs text-gray-500">Last Name:</label><p class="text-gray-800 mt-1">${currentUser.lName}</p></div>
+                                     <div><label class="text-xs text-gray-500">Login Email:</label><p class="text-gray-800 mt-1">${currentUser.email}</p></div>
+                                     <div><label class="text-xs text-gray-500">Contact Phone:</label><p class="text-gray-800 mt-1">${currentUser.phone}</p></div>
+                                     <div><label class="text-xs text-gray-500">Contact Alternate Phone:</label><p class="text-gray-800 mt-1">${currentUser.contactAlternatePhone}</p></div>
+                                     <div><label class="text-xs text-gray-500">Contact Email:</label><p class="text-gray-800 mt-1">${currentUser.contactEmail}</p></div>
+                                </div>
+                                <div class="mt-6 border-t pt-6"><a href="#" class="text-blue-600 font-semibold hover:underline">CHANGE PASSWORD</a><p class="text-sm text-gray-500 mt-1">We'll send you an email with a link to change your password.</p></div>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-md">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Account Details</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div><label class="text-xs text-gray-500">Account Name:</label><p class="text-gray-800 mt-1">${currentUser.company}</p></div>
+                                    <div><label class="text-xs text-gray-500">Site Location:</label><p class="text-gray-800 mt-1">${currentUser.location}</p></div>
+                                    <div><label class="text-xs text-gray-500">Office Code:</label><p class="text-gray-800 mt-1">${currentUser.officeCode}</p></div>
+                                    <div><label class="text-xs text-gray-500">MC/DOT Number:</label><p class="text-gray-800 mt-1">${currentUser.mcDotNumber}</p></div>
+                                    <div class="md:col-span-2"><label class="text-xs text-gray-500">Subscriptions:</label><p class="text-gray-800 mt-1">${currentUser.subscriptions.join(', ')}</p></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="bg-white p-6 rounded-lg shadow-md">
+                                <h4 class="font-semibold text-gray-700 mb-4">Account Switcher Display</h4>
+                                <div class="space-y-3">
+                                    <label class="flex items-center"><input type="checkbox" data-pref="company" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" ${globalDisplayPrefs.company ? 'checked' : ''}><span class="ml-2 text-sm text-gray-600">Account Name</span></label>
+                                    <label class="flex items-center"><input type="checkbox" data-pref="location" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" ${globalDisplayPrefs.location ? 'checked' : ''}><span class="ml-2 text-sm text-gray-600">Site Location</span></label>
+                                    <label class="flex items-center"><input type="checkbox" data-pref="officeCode" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" ${globalDisplayPrefs.officeCode ? 'checked' : ''}><span class="ml-2 text-sm text-gray-600">Office Code</span></label>
+                                    <label class="flex items-center"><input type="checkbox" data-pref="nickname" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" ${globalDisplayPrefs.nickname ? 'checked' : ''}><span class="ml-2 text-sm text-gray-600">Account Nickname:</span><input type="text" id="nicknameInput" value="${currentUser.nickname || ''}" class="ml-2 text-sm p-1 bg-gray-100 rounded border border-gray-300 w-full mt-1"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                lucide.createIcons();
+            }
+            
+            function handleNicknameChange(newNickname) {
+                const userToUpdate = users.find(u => u.id === currentUser.id);
+                if (userToUpdate) {
+                    userToUpdate.nickname = newNickname;
+                    currentUser.nickname = newNickname;
+                    updateAllUI(accountSearchInput.value);
+                }
+            }
+
+            function updateAllUI(searchTerm = '') {
+                renderNav();
+                renderPageContent();
+                updateAccountList(searchTerm, accountList, accountMenuCurrentUser);
+                if(userProfileView.classList.contains('hidden') === false) {
+                    renderUserProfile();
+                    updateAccountList(profileAccountSearchInput.value, profileAccountList, profileAccountMenuCurrentUser);
+                }
+            }
+
+            // --- Event Listeners ---
+            
+            document.body.addEventListener('click', (e) => {
+                const avatarButton = e.target.closest('#avatarButton');
+                const bentoButton = e.target.closest('#bentoButton');
+                const platformLink = e.target.closest('[data-platform]');
+                const accountInfoLinkTarget = e.target.closest('#platformAccountInfoLink');
+                const backToAppTarget = e.target.closest('#backToApp');
+                const toolsLinkTarget = e.target.closest('#toolsLink');
+                const logoutButtonTarget = e.target.closest('#logoutButton');
+                const profileNavHeaderTarget = e.target.closest('#profileNavHeader');
+                const userItem = e.target.closest('[data-id]');
+                const clearSearch = e.target.closest('#clearSearchButton');
+                const profileClearSearch = e.target.closest('#profileClearSearchButton');
+                 
+                if (avatarButton) {
+                    e.stopPropagation();
+                    updateAccountList('', accountList, accountMenuCurrentUser);
+                    accountMenu.classList.toggle('hidden');
+                } else if (bentoButton) {
+                     e.stopPropagation();
+                    const iqOption = platformSwitcherMenu.querySelector('[data-platform="iQ"]');
+                    const oneOption = platformSwitcherMenu.querySelector('[data-platform="One"]');
+                    iqOption.classList.toggle('platform-disabled', !currentUser.platform.includes('iQ'));
+                    oneOption.classList.toggle('platform-disabled', !currentUser.platform.includes('One'));
+
+                    const bentoRect = bentoButton.getBoundingClientRect();
+                    platformSwitcherMenu.style.top = `${bentoRect.top}px`;
+                    platformSwitcherMenu.style.left = `${bentoRect.right + 8}px`;
+                    
+                    platformSwitcherMenu.classList.toggle('hidden');
+                } else if (platformLink && !platformLink.classList.contains('platform-disabled')) {
+                    e.preventDefault();
+                    currentNavType = platformLink.dataset.platform;
+                    if(pageOverlay) pageOverlay.classList.add('hidden');
+                    updateAllUI();
+                    platformSwitcherMenu.classList.add('hidden');
+                    accountMenu.classList.add('hidden');
+                } else if (accountInfoLinkTarget) {
+                     e.preventDefault(); 
+                     renderUserProfile(); 
+                     mainAppView.classList.add('hidden'); 
+                     userProfileView.classList.remove('hidden'); 
+                     accountMenu.classList.add('hidden');
+                     platformSwitcherMenu.classList.add('hidden');
+                } else if (backToAppTarget) {
+                    userProfileView.classList.add('hidden'); mainAppView.classList.remove('hidden');
+                } else if (toolsLinkTarget) {
+                     e.preventDefault(); userProfileView.classList.add('hidden'); mainAppView.classList.remove('hidden');
+                } else if (logoutButtonTarget) {
+                     e.preventDefault(); mainAppView.classList.add('hidden'); userProfileView.classList.add('hidden'); loginView.classList.remove('hidden'); accountMenu.classList.add('hidden');
+                } else if(profileNavHeaderTarget) {
+                    e.stopPropagation();
+                    updateAccountList('', profileAccountList, profileAccountMenuCurrentUser);
+                    const navHeaderRect = profileNavHeader.getBoundingClientRect();
+                    profileAccountMenu.style.top = `${navHeaderRect.bottom + 4}px`;
+                    profileAccountMenu.style.left = `${navHeaderRect.left}px`;
+                    profileAccountMenu.classList.toggle('hidden');
+                } else if (userItem) {
+                    const listContainer = userItem.parentElement;
+                    const userId = parseInt(userItem.dataset.id);
+                    if (listContainer.id === 'accountList') {
+                         currentUser = users.find(u => u.id === userId) || currentUser;
+                         pageOverlay.classList.toggle('hidden', currentUser.platform.includes(currentNavType));
+                         updateAllUI(accountSearchInput.value);
+                         accountMenu.classList.add('hidden'); 
+                    } else if (listContainer.id === 'profileAccountList') {
+                         currentUser = users.find(u => u.id === userId) || currentUser;
+                         updateAllUI(profileAccountSearchInput.value);
+                         profileAccountMenu.classList.add('hidden');
+                    }
+                } else if(clearSearch) {
+                    accountSearchInput.value = '';
+                    updateAccountList('', accountList, accountMenuCurrentUser);
+                    clearSearch.classList.add('hidden');
+                } else if (profileClearSearch) {
+                    profileAccountSearchInput.value = '';
+                    updateAccountList('', profileAccountList, profileAccountMenuCurrentUser);
+                    profileClearSearch.classList.add('hidden');
+                }
+
+                // Close menus if clicking outside
+                if (!e.target.closest('.account-menu') && !e.target.closest('#avatarButton') && !e.target.closest('#userInfoPopup')) {
+                    accountMenu.classList.add('hidden');
+                    userInfoPopup.classList.add('hidden');
+                }
+                 if (!e.target.closest('#platformSwitcherMenu') && !e.target.closest('#bentoButton')) {
+                    platformSwitcherMenu.classList.add('hidden');
+                }
+                 if (!e.target.closest('#profileAccountMenu') && !e.target.closest('#profileNavHeader')) {
+                    profileAccountMenu.classList.add('hidden');
+                }
+
+            });
+
+            document.body.addEventListener('mouseover', e => {
+                const infoContainer = e.target.closest('.info-icon-container');
+                 if (infoContainer) {
+                    clearTimeout(infoPopupTimeout);
+                    const userItem = infoContainer.closest('[data-id]');
+                    const userId = parseInt(userItem.dataset.id);
+                    const user = users.find(u => u.id === userId);
+                    renderInfoPopup(user);
+                    const menuRect = infoContainer.closest('.account-menu').getBoundingClientRect();
+                    userInfoPopup.style.left = `${menuRect.right + 8}px`;
+                    userInfoPopup.style.top = `${menuRect.top}px`;
+                    userInfoPopup.classList.remove('hidden');
+                }
+            });
+
+             document.body.addEventListener('mouseout', e => {
+                 const infoContainer = e.target.closest('.info-icon-container');
+                 if(infoContainer) {
+                    infoPopupTimeout = setTimeout(() => {
+                        userInfoPopup.classList.add('hidden');
+                    }, 200);
+                 }
+            });
+
+            
+            if (userInfoPopup) {
+                userInfoPopup.addEventListener('mouseover', () => clearTimeout(infoPopupTimeout));
+                userInfoPopup.addEventListener('mouseout', () => {
+                    infoPopupTimeout = setTimeout(() => {
+                        userInfoPopup.classList.add('hidden');
+                    }, 200);
+                });
+            }
+            
+            if (profileContent) {
+                profileContent.addEventListener('input', (e) => { 
+                    if (e.target.id === 'nicknameInput') {
+                        handleNicknameChange(e.target.value);
+                    }
+                });
+                profileContent.addEventListener('change', (e) => { 
+                    if (e.target.type === 'checkbox' && e.target.dataset.pref) { 
+                        const pref = e.target.dataset.pref; 
+                        globalDisplayPrefs[pref] = e.target.checked; 
+                        updateAllUI(); 
+                        renderUserProfile(); 
+                    } 
+                });
+            }
+            
+            if (accountSearchInput) {
+                accountSearchInput.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value;
+                    updateAccountList(searchTerm, accountList, accountMenuCurrentUser);
+                    clearSearchButton.classList.toggle('hidden', searchTerm.length === 0);
+                });
+            }
+
+            if (profileAccountSearchInput) {
+                profileAccountSearchInput.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value;
+                    updateAccountList(searchTerm, profileAccountList, profileAccountMenuCurrentUser);
+                    profileClearSearchButton.classList.toggle('hidden', searchTerm.length === 0);
+                });
+            }
+            
+             if (loginForm) {
+                 loginForm.addEventListener('submit', (e) => {
+                    e.preventDefault(); 
+                    loginView.classList.add('hidden');
+                    mainAppView.classList.remove('hidden');
+                    currentNavType = 'One';
+                    updateAllUI();
+                });
+            }
+            
+            updateAllUI();
+        });
+
+    </script>
+</body>
+</html>
+
