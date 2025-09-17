@@ -6,6 +6,8 @@
     <title>iQ Navigation Panel</title>
     <!-- Tailwind CSS for utility-first styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons for vector-based icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Inter font for the entire application -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,8 +19,9 @@
             background-color: #F6F7F9;
             margin: 0;
             display: flex;
+            justify-content: flex-start; /* Align content to the left */
+            align-items: flex-start;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
         /* --- Design System Color Placeholders (For clarity) --- */
@@ -74,159 +77,116 @@
         
         /* User Profile Page specific styles */
         .profile-nav-item {
-            transition: background-color 0.2s ease;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
         .profile-nav-item.active, .profile-nav-item:hover {
             background-color: #2D3943;
+            color: #ffffff;
         }
         
-        .rate-card-grid {
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        }
-        
-        .platform-disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .platform-disabled:hover {
-            background-color: transparent !important;
+        #profileAccountListContainer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
         }
 
-        /* Custom scrollbar for pop-outs */
-        .custom-scrollbar-dark::-webkit-scrollbar {
-          width: 8px;
+        /* Styles for the scrollable account switcher */
+        #accountList, #profileAccountList {
+            max-height: 300px; /* Set a max height to enable scrolling */
+            overflow-y: auto; /* Show scrollbar when content overflows */
         }
-        .custom-scrollbar-dark::-webkit-scrollbar-track {
-          background: #2d3943;
-          border-radius: 4px;
+
+        /* Custom scrollbar for account switcher to match the dark theme */
+        #accountList::-webkit-scrollbar, #profileAccountList::-webkit-scrollbar {
+            width: 8px;
         }
-        .custom-scrollbar-dark::-webkit-scrollbar-thumb {
-          background-color: #4b5563;
-          border-radius: 4px;
+        #accountList::-webkit-scrollbar-track, #profileAccountList::-webkit-scrollbar-track {
+            background: #2D3943;
         }
-        
-        .custom-scrollbar-light::-webkit-scrollbar {
-          width: 8px;
+        #accountList::-webkit-scrollbar-thumb, #profileAccountList::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+            border-radius: 10px;
+            border: 2px solid #2D3943;
         }
-        .custom-scrollbar-light::-webkit-scrollbar-track {
-          background: #e5e7eb;
-          border-radius: 4px;
-        }
-        .custom-scrollbar-light::-webkit-scrollbar-thumb {
-          background-color: #9ca3af;
-          border-radius: 4px;
+        #accountList::-webkit-scrollbar-thumb:hover, #profileAccountList::-webkit-scrollbar-thumb:hover {
+            background-color: #6b7280;
         }
 
     </style>
 </head>
 <body class="bg-white">
 
-    <!-- Initial Login View -->
-    <div id="loginView" class="w-full h-screen flex items-center justify-center bg-gray-800" style="background-image: url('https://placehold.co/1920x1080/374151/4B5563?text=Map+Texture'); background-size: cover;">
-        <div id="loginBox" class="bg-white p-8 rounded-lg shadow-lg w-96">
-            <div class="flex justify-center mb-6">
-                 <div class="text-3xl font-bold flex items-center"><span class="bg-blue-600 text-white px-2 py-1 rounded-md mr-1">D</span><span class="bg-blue-600 text-white px-2 py-1 rounded-md mr-1">A</span><span class="bg-blue-600 text-white px-2 py-1 rounded-md">T</span><span class="ml-2 text-2xl font-semibold">Freight & Analytics</span></div>
-            </div>
-            <h2 class="text-2xl font-bold text-center mb-2">Log In</h2>
-            <p class="text-center text-gray-500 mb-6">To continue to your DAT account</p>
-            <form id="loginForm">
-                 <div class="mb-4">
-                    <label for="email" class="text-sm font-medium text-gray-700">Email address*</label>
-                    <input type="email" id="email" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" value="john.doe1@email.com" required>
-                </div>
-                 <div class="mb-6">
-                    <label for="password" class="text-sm font-medium text-gray-700">Password*</label>
-                    <input type="password" id="password" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" value="************" required>
-                </div>
-                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Continue</button>
-            </form>
-        </div>
-    </div>
-
-
     <!-- Main App View -->
-    <div id="mainAppView" class="hidden flex w-full h-screen relative">
-        <div class="relative flex-shrink-0">
+    <div id="mainAppView" class="flex">
+        <div class="relative flex">
             <!-- Main navigation container -->
-            <div id="mainNavContainer" class="w-20 h-full pt-6 bg-Web-Fill-Navigation-Default flex flex-col items-center">
+            <div id="mainNavContainer" class="w-20 h-screen pt-6 bg-Web-Fill-Navigation-Default flex flex-col items-center">
                 <!-- Nav content is rendered here by JS -->
             </div>
 
+            <!-- Platform Select Menu -->
+            <div id="platformMenu" class="hidden absolute left-full ml-2 top-4 w-64 bg-[#192129] text-white rounded-md account-menu z-10">
+                 <div class="px-4 py-3 border-b border-gray-700"><h3 class="text-lg font-semibold text-center">Select Platform</h3></div>
+                 <div id="platformList" class="py-2 border-b border-gray-700"></div>
+                 <div class="p-2"><button id="platformContinueButton" class="w-full bg-blue-600 text-white rounded py-2 hover:bg-blue-700">Continue</button></div>
+            </div>
+
             <!-- Account Menu (Initially Hidden) -->
-            <div id="accountMenu" class="hidden absolute left-full ml-2 bottom-4 w-80 bg-[#192129] text-white rounded-md account-menu z-20">
-                 <div id="accountMenuCurrentUser"></div>
-                 <div class="p-2 border-b border-gray-700">
-                    <div class="relative">
-                        <input type="text" id="accountSearchInput" placeholder="Search accounts..." class="w-full bg-[#2D3943] text-white rounded-md py-1.5 pl-8 pr-8 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                        <i data-lucide="search" class="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-                        <button id="clearSearchButton" class="hidden absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-gray-600">
-                            <i data-lucide="x" class="w-4 h-4 text-gray-400"></i>
-                        </button>
-                    </div>
-                 </div>
-                 <div id="accountList" class="py-2 border-b border-gray-700 max-h-96 overflow-y-auto custom-scrollbar-dark"></div>
-                <div class="border-t border-gray-700 py-2"><a href="#" id="logoutButton" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Log Out</a></div>
-            </div>
-            
-             <!-- User Info Popup (Initially Hidden) -->
-            <div id="userInfoPopup" class="hidden absolute bg-[#2D3943] text-white rounded-md shadow-lg p-3 border border-gray-600 z-30 w-[450px]"></div>
-
-            <!-- Platform Switcher Menu -->
-            <div id="platformSwitcherMenu" class="hidden absolute w-64 bg-[#192129] text-white rounded-md account-menu z-30">
-                <div class="py-2">
-                    <a href="#" data-platform="iQ" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">DAT iQ</a>
-                    <a href="#" data-platform="One" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">DAT One</a>
-                    <div class="flex justify-between items-center px-4 py-2 text-sm text-gray-500 cursor-not-allowed">
-                        <span>Outgo</span>
-                        <span class="text-xs bg-gray-600 px-2 py-0.5 rounded-full">Coming Soon</span>
-                    </div>
-                    <div class="flex justify-between items-center px-4 py-2 text-sm text-gray-500 cursor-not-allowed">
-                        <span>Trucker Tools</span>
-                         <span class="text-xs bg-gray-600 px-2 py-0.5 rounded-full">Coming Soon</span>
+            <div id="accountMenu" class="hidden absolute left-full ml-2 bottom-4 w-72 bg-[#192129] text-white rounded-md account-menu z-10 flex flex-col">
+                <div class="px-4 py-3 border-b border-gray-700">
+                    <h3 class="text-lg font-semibold text-center">Select Account</h3>
+                    <div class="relative mt-2">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                            <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
+                        </span>
+                        <input type="text" id="accountSearchInput" placeholder="Search accounts..." class="w-full bg-[#2D3943] text-white rounded py-1 pl-9 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
                     </div>
                 </div>
-                 <div class="border-t border-gray-700 py-2">
-                    <a href="#" id="platformAccountInfoLink" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">
-                        <i data-lucide="user" class="w-5 h-5 mr-3"></i> Account Information
-                    </a>
+                <!-- Currently Selected Account -->
+                <div id="currentAccountDisplay" class="p-3 bg-black bg-opacity-20 border-b border-gray-700">
+                    <!-- Current user info rendered here -->
                 </div>
+                <div class="flex-1 min-h-0">
+                    <div id="accountList" class="py-2"></div>
+                    <div id="accountListNoMatch" class="hidden text-center py-4 text-gray-500 text-sm">No match found</div>
+                </div>
+                <div class="border-t border-gray-700 py-2"><a href="#" id="accountInfoLink" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"><i data-lucide="user" class="w-5 h-5 mr-3"></i> Account Information</a><a href="#" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"><i data-lucide="message-square" class="w-5 h-5 mr-3"></i> Live Support</a><a href="#" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"><i data-lucide="book-open" class="w-5 h-5 mr-3"></i> Help Center</a></div>
+                <div class="border-t border-gray-700 py-2"><a href="#" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Log Out</a></div>
             </div>
-
         </div>
-        <main id="pageContent" class="flex-1 h-full overflow-y-auto bg-gray-50 relative">
-            <div id="dynamic-dashboard-content">
-                <!-- Page content (Dashboard or other pages) will be rendered here -->
-            </div>
-             <div id="pageOverlay" class="hidden absolute inset-0 bg-gray-900 bg-opacity-50 z-10"></div>
-        </main>
     </div>
-    
+
     <!-- User Profile View (Initially Hidden) -->
     <div id="userProfileView" class="hidden w-full h-screen">
-        <div class="flex h-full relative">
+        <div class="flex h-full">
             <!-- Profile Navigation -->
-            <div class="w-64 h-full bg-Web-Fill-Navigation-Default text-white flex flex-col flex-shrink-0">
+            <div class="w-64 h-full bg-Web-Fill-Navigation-Default text-white flex flex-col">
                 <div id="backToApp" class="px-6 py-4 border-b border-gray-700 cursor-pointer"><div class="text-2xl font-bold flex items-center"><span class="bg-blue-600 text-white px-2 py-1 rounded-md mr-1">D</span><span class="bg-blue-600 text-white px-2 py-1 rounded-md mr-1">A</span><span class="bg-blue-600 text-white px-2 py-1 rounded-md">T</span></div><h2 class="text-2xl font-semibold mt-1">Account</h2></div>
-                <div id="profileNavHeader" class="px-6 py-4 border-b border-gray-700 cursor-pointer"></div>
-                <nav class="flex-1 px-2 py-4"><div class="space-y-1"><a href="#" class="profile-nav-item active flex items-center px-4 py-2 rounded-md"><i data-lucide="user" class="w-5 h-5 mr-3"></i> User Profile</a><a href="#" class="profile-nav-item flex items-center px-4 py-2 rounded-md"><i data-lucide="search" class="w-5 h-5 mr-3"></i> Company Profile</a><a href="#" class="profile-nav-item flex items-center px-4 py-2 rounded-md"><i data-lucide="star" class="w-5 h-5 mr-3"></i> Manage Reputation</a></div><div class="border-t border-gray-700 my-2"></div><div class="space-y-1"><a href="#" id="toolsLink" class="profile-nav-item flex items-center px-4 py-2 rounded-md"><i data-lucide="grid" class="w-5 h-5 mr-3"></i> Tools</a><a href="#" class="profile-nav-item flex items-center px-4 py-2 rounded-md"><i data-lucide="message-circle" class="w-5 h-5 mr-3"></i> Help Center</a><a href="#" class="profile-nav-item flex items-center px-4 py-2 rounded-md"><i data-lucide="message-square" class="w-5 h-5 mr-3"></i> Live Support</a></div></nav>
-                <div class="px-4 py-2 mt-auto border-t border-gray-700"><a href="#" class="flex items-center text-sm text-gray-400 hover:text-white py-1"><i data-lucide="shield" class="w-5 h-5 mr-3"></i> Privacy Policy</a><a href="#" class="flex items-center text-sm text-gray-400 hover:text-white py-1"><i data-lucide="file-text" class="w-5 h-5 mr-3"></i> Terms and Conditions</a><a href="#" class="flex items-center text-sm text-gray-400 hover:text-white py-2 mt-2"><i data-lucide="log-out" class="w-5 h-5 mr-3"></i> Sign Out</a></div>
-            </div>
-            
-             <!-- Profile Account Menu (Initially Hidden) -->
-            <div id="profileAccountMenu" class="hidden absolute top-0 left-0 w-80 bg-[#192129] text-white rounded-md account-menu z-20">
-                 <div id="profileAccountMenuCurrentUser"></div>
-                 <div class="p-2 border-b border-gray-700">
-                    <div class="relative">
-                        <input type="text" id="profileAccountSearchInput" placeholder="Search accounts..." class="w-full bg-[#2D3943] text-white rounded-md py-1.5 pl-8 pr-8 text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                        <i data-lucide="search" class="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-                        <button id="profileClearSearchButton" class="hidden absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-gray-600">
-                            <i data-lucide="x" class="w-4 h-4 text-gray-400"></i>
-                        </button>
+                <div id="profileNavHeader" class="px-6 py-4 border-b border-gray-700"></div>
+                 <div id="showMoreAccountsContainer" class="border-b border-gray-700">
+                    <button id="showMoreAccountsButton" class="w-full flex items-center justify-between px-6 py-3 text-sm text-gray-300 hover:bg-gray-700">
+                        <span>Select Account</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-5 h-5 transition-transform duration-300"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div id="profileAccountListContainer" class="bg-black bg-opacity-20">
+                         <div class="p-2 border-b border-gray-700">
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
+                                </span>
+                                <input type="text" id="profileAccountSearchInput" placeholder="Search accounts..." class="w-full bg-[#2D3943] text-white rounded py-1 pl-9 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            </div>
+                        </div>
+                        <!-- Current Account in Profile Switcher -->
+                        <div id="profileCurrentAccountDisplay" class="p-3 bg-black bg-opacity-25 border-b border-gray-700">
+                           <!-- Current user info rendered here -->
+                        </div>
+                        <div id="profileAccountList" class="py-2 px-2"></div>
+                        <div id="profileAccountListNoMatch" class="hidden text-center py-4 text-gray-500 text-sm">No match found</div>
                     </div>
-                 </div>
-                 <div id="profileAccountList" class="py-2 border-b border-gray-700 max-h-96 overflow-y-auto custom-scrollbar-dark"></div>
-                <div class="border-t border-gray-700 py-2"><a href="#" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Manage Accounts</a></div>
+                </div>
+                <nav class="flex-1 px-2 py-4"><div class="space-y-1"><a href="#" data-icon-name="user" class="profile-nav-item active flex items-center px-4 py-2 rounded-md"><i data-lucide="user" class="w-5 h-5 mr-3"></i> User Profile</a><a href="#" data-icon-name="search" class="profile-nav-item flex items-center px-4 py-2 rounded-md"><i data-lucide="search" class="w-5 h-5 mr-3"></i> Company Profile</a><a href="#" data-icon-name="star" class="profile-nav-item flex items-center px-4 py-2 rounded-md"><i data-lucide="star" class="w-5 h-5 mr-3"></i> Manage Reputation</a></div><div class="border-t border-gray-700 my-2"></div><div class="space-y-1"><a href="#" id="toolsLink" data-icon-name="grid" class="profile-nav-item flex items-center px-4 py-2 rounded-md"><i data-lucide="grid" class="w-5 h-5 mr-3"></i> Tools</a><a href="#" data-icon-name="message-circle" class="profile-nav-item flex items-center px-4 py-2 rounded-md"><i data-lucide="message-circle" class="w-5 h-5 mr-3"></i> Help Center</a><a href="#" data-icon-name="message-square" class="profile-nav-item flex items-center px-4 py-2 rounded-md"><i data-lucide="message-square" class="w-5 h-5 mr-3"></i> Live Support</a></div></nav>
+                <div class="px-4 py-2 mt-auto border-t border-gray-700"><a href="#" class="flex items-center text-sm text-gray-400 hover:text-white py-1"><i data-lucide="shield" class="w-5 h-5 mr-3"></i> Privacy Policy</a><a href="#" class="flex items-center text-sm text-gray-400 hover:text-white py-1"><i data-lucide="file-text" class="w-5 h-5 mr-3"></i> Terms and Conditions</a><a href="#" class="flex items-center text-sm text-gray-400 hover:text-white py-2 mt-2"><i data-lucide="log-out" class="w-5 h-5 mr-3"></i> Sign Out</a></div>
             </div>
 
             <!-- Profile Content -->
@@ -234,645 +194,515 @@
         </div>
     </div>
 
+    <!-- Tooltip for Account Information -->
+    <div id="accountTooltip" class="hidden absolute z-20 w-80 p-3 bg-[#2D3943] border border-gray-600 rounded-md text-white text-xs shadow-lg space-y-2">
+        <!-- Tooltip content will be injected here by JS -->
+    </div>
 
-    <script src="https://unpkg.com/lucide@latest"></script>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => { 
-            lucide.createIcons();
-            // --- Data ---
-            let users = [];
-            
-            function getInitials(name) {
-                const words = name.split(' ');
-                if (words.length > 1) {
-                    return `${words[0][0]}${words[1][0]}`.toUpperCase();
+        // --- Data ---
+        const users = [];
+        const baseUsers = [
+            { platform: 'iQ', isAdmin: true, initials: 'LS1', fName: 'John', lName: 'Doe', email: 'john.doe1@email.com', phone: '555-555-5551', color: 'bg-gray-500', location: 'Portland, OR', officeCode: 'PDX-01', roles: ['Enterprise Sales Exec', 'Technology Lead'], mcDotNumber: 'MC-100001', subscriptions: ['Directory', 'DAT One'] },
+            { platform: 'One', isAdmin: false, initials: 'LS2', fName: 'Jane', lName: 'Smith', email: 'jane.smith@email.com', phone: '555-555-5552', color: 'bg-blue-500', location: 'Denver, CO', officeCode: 'DEN-02', roles: ['Carrier Sales'], mcDotNumber: 'MC-100002', subscriptions: ['DAT One'] },
+            { platform: 'One', isAdmin: false, initials: 'LS3', fName: 'Jim', lName: 'Brown', email: 'jim.brown@email.com', phone: '555-555-5553', color: 'bg-green-500', location: 'Atlanta, GA', officeCode: 'ATL-03', roles: ['Logistics Coordinator'], mcDotNumber: 'MC-100003', subscriptions: ['Directory'] },
+            { platform: 'iQ + One', isAdmin: false, initials: 'LS4', fName: 'Joan', lName: 'Davis', email: 'joan.davis@email.com', phone: '555-555-5554', color: 'bg-purple-500', location: 'Chicago, IL', officeCode: 'CHI-04', roles: ['Administrator', 'Super User'], mcDotNumber: 'MC-100004', subscriptions: ['Directory', 'DAT One', 'iQ Premium'] }
+        ];
+
+        // Generate a large list of accounts to demonstrate scrolling
+        for (let i = 1; i <= 25; i++) {
+            const base = baseUsers[(i - 1) % baseUsers.length];
+            let newSubscriptions = [...base.subscriptions];
+            let newRoles = [...base.roles];
+
+            // Add "RateView Multilane" and randomly "TRI Analyst" role if platform includes iQ
+            if (base.platform.includes('iQ')) {
+                if (!newSubscriptions.includes('RateView Multilane')) {
+                    newSubscriptions.push('RateView Multilane');
                 }
-                return name.substring(0, 2).toUpperCase();
+                // Randomly add "TRI Analyst" role for iQ users
+                if (Math.random() > 0.5) {
+                    newRoles.push('TRI Analyst');
+                }
             }
-
-            const accountData = [
-                { id: 1, company: 'Bahamas Trucking', platform: 'One', isAdmin: false, color: 'bg-blue-500' },
-                { id: 2, company: 'Midwest Trucking', platform: 'One', isAdmin: false, color: 'bg-green-500' },
-                { id: 3, company: 'Lonestar Trucking', platform: 'One', isAdmin: false, color: 'bg-purple-500' },
-                { id: 4, company: "Paul's iQ Account", platform: 'iQ', isAdmin: true, color: 'bg-gray-500' }
-            ];
-
-             users = accountData.map((acc) => {
-                const company = acc.company;
-                 return {
-                    id: acc.id,
-                    platform: acc.platform,
-                    name: `John Doe${acc.id}`,
-                    isAdmin: acc.isAdmin,
-                    initials: getInitials(company),
-                    fName: 'John',
-                    lName: `Doe${acc.id}`,
-                    email: `john.doe${acc.id}@email.com`,
-                    phone: `555-555-${String(1000 + acc.id).padStart(4, '0')}`,
-                    contactEmail: `contact.doe${acc.id}@email.com`,
-                    contactAlternatePhone: `555-555-${String(2000+acc.id).padStart(4, '0')}`,
-                    color: acc.color,
-                    company: company,
-                    location: ['Nassau, BS', 'Chicago, IL', 'Austin, TX', 'Portland, OR'][acc.id-1],
-                    officeCode: `CODE-${acc.id}`,
-                    nickname: '',
-                    roles: [],
-                    mcDotNumber: `MC-${String(100000 + acc.id).padStart(6, '0')}`,
-                    subscriptions: [acc.platform],
-                };
+            
+            users.push({
+                id: i,
+                platform: base.platform,
+                name: 'Landstar Ligon', // All accounts are named "Landstar Ligon"
+                isAdmin: i === 1 ? true : base.isAdmin, // Make first one admin
+                initials: `LS${i}`,
+                fName: base.fName,
+                lName: base.lName,
+                email: `user${i}@landstar.com`,
+                phone: `555-555-${5550 + i}`,
+                color: base.color,
+                company: 'Landstar Ligon', // The company is also Landstar Ligon
+                location: `${base.location} #${i}`, // Unique location to differentiate accounts
+                officeCode: `${base.officeCode}-${i}`, // Unique office code to differentiate accounts
+                roles: newRoles,
+                mcDotNumber: `MC-${100000 + i}`,
+                subscriptions: newSubscriptions,
+                userNotes: '', // Initially empty
+                adminNotes: i === 1 ? 'This is the primary admin account for Landstar Ligon.' : '' // Example admin note
             });
+        }
+        
+        let currentUser = users[0];
+        // Display location and office code by default
+        let globalDisplayPrefs = { location: true, officeCode: true, userNotes: false };
+        let currentNavType = 'iQ';
+        let tempSelectedPlatform = 'iQ';
+        let accountSearchTerm = '';
+        let profileAccountSearchTerm = '';
 
-            let currentUser = users[0];
-            let globalDisplayPrefs = { company: false, location: false, officeCode: false, nickname: false };
-            let currentNavType = 'iQ';
-            let infoPopupTimeout;
+        // --- DOM Elements ---
+        const mainNavContainer = document.getElementById('mainNavContainer');
+        const accountMenu = document.getElementById('accountMenu');
+        const accountList = document.getElementById('accountList');
+        const mainAppView = document.getElementById('mainAppView');
+        const userProfileView = document.getElementById('userProfileView');
+        const accountInfoLink = document.getElementById('accountInfoLink');
+        const backToApp = document.getElementById('backToApp');
+        const profileNavHeader = document.getElementById('profileNavHeader');
+        const profileContent = document.getElementById('profileContent');
+        const showMoreAccountsButton = document.getElementById('showMoreAccountsButton');
+        const profileAccountListContainer = document.getElementById('profileAccountListContainer');
+        const profileAccountList = document.getElementById('profileAccountList');
+        const toolsLink = document.getElementById('toolsLink');
+        const platformMenu = document.getElementById('platformMenu');
+        const platformList = document.getElementById('platformList');
+        const platformContinueButton = document.getElementById('platformContinueButton');
+        const accountTooltip = document.getElementById('accountTooltip');
+        const accountSearchInput = document.getElementById('accountSearchInput');
+        const profileAccountSearchInput = document.getElementById('profileAccountSearchInput');
+        const accountListNoMatch = document.getElementById('accountListNoMatch');
+        const profileAccountListNoMatch = document.getElementById('profileAccountListNoMatch');
+        const currentAccountDisplay = document.getElementById('currentAccountDisplay');
+        const profileCurrentAccountDisplay = document.getElementById('profileCurrentAccountDisplay');
 
-            // --- DOM Elements ---
-            const loginView = document.getElementById('loginView');
-            const loginForm = document.getElementById('loginForm');
-            
-            const mainNavContainer = document.getElementById('mainNavContainer');
-            const accountMenu = document.getElementById('accountMenu');
-            const accountMenuCurrentUser = document.getElementById('accountMenuCurrentUser');
-            const accountList = document.getElementById('accountList');
-            const mainAppView = document.getElementById('mainAppView');
-            const userProfileView = document.getElementById('userProfileView');
-            const pageContent = document.getElementById('pageContent');
-            const dynamicDashboardContent = document.getElementById('dynamic-dashboard-content');
-            const pageOverlay = document.getElementById('pageOverlay');
-            const platformSwitcherMenu = document.getElementById('platformSwitcherMenu');
-            const userInfoPopup = document.getElementById('userInfoPopup');
-            
-            const backToApp = document.getElementById('backToApp');
-            const profileNavHeader = document.getElementById('profileNavHeader');
-            const profileContent = document.getElementById('profileContent');
-            const profileAccountMenu = document.getElementById('profileAccountMenu');
-            const profileAccountMenuCurrentUser = document.getElementById('profileAccountMenuCurrentUser');
-            const profileAccountList = document.getElementById('profileAccountList');
-            const profileAccountSearchInput = document.getElementById('profileAccountSearchInput');
-            const profileClearSearchButton = document.getElementById('profileClearSearchButton');
 
-            const toolsLink = document.getElementById('toolsLink');
-            const accountSearchInput = document.getElementById('accountSearchInput');
-            const clearSearchButton = document.getElementById('clearSearchButton');
+        // --- Functions ---
+        
+        function filterUsers(searchTerm) {
+            if (!searchTerm) {
+                return users; // Return all users if search term is empty
+            }
+            const lowercasedTerm = searchTerm.toLowerCase();
+            return users.filter(user => {
+                // Check against all relevant user fields
+                return (
+                    user.name.toLowerCase().includes(lowercasedTerm) ||
+                    user.platform.toLowerCase().includes(lowercasedTerm) ||
+                    user.company.toLowerCase().includes(lowercasedTerm) ||
+                    user.location.toLowerCase().includes(lowercasedTerm) ||
+                    user.officeCode.toLowerCase().includes(lowercasedTerm) ||
+                    user.fName.toLowerCase().includes(lowercasedTerm) ||
+                    user.lName.toLowerCase().includes(lowercasedTerm) ||
+                    user.email.toLowerCase().includes(lowercasedTerm) ||
+                    user.phone.toLowerCase().includes(lowercasedTerm) ||
+                    user.initials.toLowerCase().includes(lowercasedTerm) ||
+                    (user.userNotes && user.userNotes.toLowerCase().includes(lowercasedTerm)) ||
+                    user.mcDotNumber.toLowerCase().includes(lowercasedTerm) ||
+                    (user.adminNotes && user.adminNotes.toLowerCase().includes(lowercasedTerm)) ||
+                    user.roles.join(', ').toLowerCase().includes(lowercasedTerm) ||
+                    user.subscriptions.join(', ').toLowerCase().includes(lowercasedTerm)
+                );
+            });
+        }
+        
+        function getUserDisplay(user, isCurrent = false) {
+            const platformLabel = `<span class="text-xs font-normal text-gray-400 ml-2">${user.platform}</span>`;
+            const adminLabel = user.isAdmin ? ' <span class="text-xs font-normal text-gray-400 ml-1">- A</span>' : '';
+            const infoIcon = `<i data-lucide="info" class="w-4 h-4 text-gray-400 hover:text-white ml-2 cursor-pointer account-info-icon" data-user-id="${user.id}"></i>`;
             
+            let details = `<p class="font-semibold text-base flex items-center">${user.name}${!isCurrent ? infoIcon : ''}${platformLabel}${adminLabel}</p>`;
+            if (globalDisplayPrefs.userNotes && user.userNotes) details += `<p class="text-xs text-yellow-400 italic">"${user.userNotes}"</p>`;
+            if (globalDisplayPrefs.location) details += `<p class="text-xs text-gray-400">${user.location}</p>`;
+            if (globalDisplayPrefs.officeCode) details += `<p class="text-xs text-gray-400">${user.officeCode}</p>`;
+            
+            const checkIcon = isCurrent ? '<div class="absolute right-3 top-1/2 -translate-y-1/2"><i data-lucide="check" class="w-5 h-5 text-green-400"></i></div>' : '';
+            const avatar = `<div class="w-8 h-8 mr-3 ${user.color} rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0">${user.initials}</div>`;
 
-            // --- Functions ---
-            
-            function getUserDisplay(user, isLogin=false) {
-                const platformLabel = `<span class="text-xs font-normal ${isLogin ? 'text-gray-400' : 'text-gray-400'} ml-2">${user.platform}</span>`;
-                const adminLabel = user.isAdmin ? ` <span class="text-xs font-normal ${isLogin ? 'text-gray-400' : 'text-gray-400'} ml-1">- A</span>` : '';
-                let details = `<p class="font-semibold text-base flex items-center">${user.company}${platformLabel}${adminLabel}</p>`;
-                 if (globalDisplayPrefs.location) details += `<p class="text-xs ${isLogin ? 'text-gray-500' : 'text-gray-400'}">${user.location}</p>`;
-                if (globalDisplayPrefs.officeCode) details += `<p class="text-xs ${isLogin ? 'text-gray-500' : 'text-gray-400'}">${user.officeCode}</p>`;
-                if (globalDisplayPrefs.nickname && user.nickname) details += `<p class="text-xs ${isLogin ? 'text-gray-500' : 'text-gray-400'} italic">"${user.nickname}"</p>`;
-                return `<div>${details}</div>`;
+            return `<div class="flex items-center relative">${avatar}<div>${details}</div>${checkIcon}</div>`;
+        }
+
+
+        function renderNav() {
+            let navToRender = currentNavType;
+            if (currentUser.platform.includes('iQ') && currentUser.platform.includes('One')) {
+                // Keep current nav if user has both
+            } else if (currentUser.platform === 'iQ') {
+                navToRender = 'iQ';
+            } else if (currentUser.platform === 'One') {
+                navToRender = 'One';
             }
             
-            function renderInfoPopup(user) {
-                userInfoPopup.innerHTML = `
-                    <h4 class="font-bold text-sm mb-2 border-b border-gray-600 pb-1">${user.name}</h4>
-                    <div class="grid grid-cols-2 gap-x-4 text-xs">
-                        <div>
-                            <p class="font-semibold text-gray-400">Username:</p> <p>${user.name}</p>
-                            <p class="font-semibold text-gray-400 mt-2">Email:</p> <p>${user.email}</p>
-                            <p class="font-semibold text-gray-400 mt-2">Roles:</p> <p>${user.roles.length > 0 ? user.roles.join(', ') : 'N/A'}</p>
-                        </div>
-                        <div>
-                            <p class="font-semibold text-gray-400">Account Name:</p> <p>${user.company}</p>
-                            <p class="font-semibold text-gray-400 mt-2">MC/DOT Number:</p> <p>${user.mcDotNumber}</p>
-                            <p class="font-semibold text-gray-400 mt-2">Subscriptions:</p> <p>${user.subscriptions.join(', ')}</p>
-                        </div>
-                    </div>
-                `;
-            }
-
-            function renderAccessDeniedMessage() {
-                return `
-                    <div id="accessDeniedMessage" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 z-20">
-                        <div class="text-center p-8">
-                            <i data-lucide="lock" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
-                            <h2 class="text-2xl font-bold text-gray-800">You need access</h2>
-                            <p class="mt-2 text-gray-500">Switch to an account with access or select an available platform from the "More Tools" menu.</p>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            function renderOneDashboard() {
-                dynamicDashboardContent.innerHTML = `
-                    <div class="p-8 flex gap-8">
-                        <div class="flex-1 space-y-6">
-                            <header class="flex justify-between items-center">
-                                <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
-                            </header>
-                            <div class="flex items-center gap-2 border-b pb-4">
-                                <button class="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 border rounded-md hover:bg-gray-200">POST A SHIPMENT</button>
-                                <button class="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 border rounded-md hover:bg-gray-200">SEARCH TRUCKS</button>
-                                <button class="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 border rounded-md hover:bg-gray-200">POST A TRUCK</button>
-                                <button class="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 border rounded-md hover:bg-gray-200">SEARCH LOADS</button>
-                            </div>
-                            <div class="bg-white p-6 rounded-lg shadow-sm">
-                                <h2 class="text-lg font-semibold text-gray-800 mb-4">Get Started</h2>
-                                <div class="grid grid-cols-3 gap-4">
-                                    ${[...Array(3)].map(() => `
-                                    <div class="space-y-2">
-                                        <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden relative">
-                                            <img src="https://placehold.co/300x170/192129/FFFFFF?text=DAT+One" class="w-full h-full object-cover" alt="Video Thumbnail">
-                                            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                                                <button class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white"><i data-lucide="play" class="w-6 h-6 fill-current"></i></button>
-                                            </div>
-                                        </div>
-                                        <h3 class="font-semibold text-sm">How to post a shipment</h3>
-                                    </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                            <div class="bg-white p-6 rounded-lg shadow-sm">
-                                <h2 class="text-lg font-semibold text-gray-800 mb-2">Help Center</h2>
-                                <p class="text-sm text-gray-500 mb-4">Contact information, troubleshooting, FAQ's and training videos.</p>
-                                <a href="#" class="text-sm font-semibold text-blue-600 hover:underline">HELP CENTER ></a>
-                            </div>
-                            <div class="bg-white p-6 rounded-lg shadow-sm flex items-center gap-6">
-                                <img src="https://placehold.co/100x200/cccccc/333333?text=Mobile" class="h-40 w-20 object-cover rounded-lg" alt="Mobile App">
-                                <div>
-                                    <h2 class="text-lg font-semibold text-gray-800 mb-2">DAT One Mobile</h2>
-                                    <p class="text-sm text-gray-500 mb-4">Combining the best tracking tools into one app.</p>
-                                    <a href="#" class="text-sm font-semibold text-blue-600 hover:underline">GET THE APP ></a>
-                                </div>
-                                <div class="ml-auto border-l pl-6">
-                                    <h3 class="font-semibold text-gray-800 mb-2">What's New</h3>
-                                    <p class="text-sm text-gray-500 mb-4">Product updates at a glance - check out what's new.</p>
-                                    <a href="#" class="text-sm font-semibold text-blue-600 hover:underline">VIEW UPDATES ></a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="w-80 flex-shrink-0 bg-white p-6 rounded-lg shadow-sm">
-                            <h2 class="text-lg font-semibold text-gray-800 mb-2">National Trucks Count</h2>
-                            <p class="text-xs text-gray-500 mb-4">refreshed at 8:07 AM</p>
-                            <select class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 mb-4">
-                                <option selected>Van (Standard)</option>
-                            </select>
-                            <div class="space-y-2 text-sm">
-                                ${['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'IA', 'ID', 'IL', 'IN'].map(st => `
-                                <div class="flex items-center">
-                                    <span class="w-8 font-mono">${st}</span>
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5 mx-2">
-                                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${Math.random()*80+10}%"></div>
-                                    </div>
-                                </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `;
-                lucide.createIcons();
-            }
-
-            function renderIQDashboard() {
-                dynamicDashboardContent.innerHTML = `
-                    <div class="p-8">
-                        <header class="flex justify-between items-center mb-6">
-                            <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
-                            <div class="flex items-center gap-2">
-                                <label for="equipment-type" class="text-sm font-medium text-gray-700">Equipment Type:</label>
-                                <select id="equipment-type" name="equipment-type" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
-                                    <option selected>Van</option>
-                                    <option value="FR">Flatbed</option>
-                                    <option value="RF">Reefer</option>
-                                </select>
-                            </div>
-                        </header>
-
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div class="lg:col-span-2 space-y-6">
-                                <!-- National Rate Card -->
-                                <div class="bg-white p-6 rounded-lg shadow-sm">
-                                    <h2 class="text-lg font-semibold text-gray-800 mb-1">National Rate</h2>
-                                    <p class="text-xs text-gray-500 mb-4">Updated 01/2025</p>
-                                    <div class="grid gap-4 rate-card-grid">
-                                        <div>
-                                            <p class="text-sm text-gray-500">Broker Spot Rate</p>
-                                            <p class="text-2xl font-bold text-gray-800">$1.63 <span class="text-sm font-normal text-red-500">(-$0.02)</span></p>
-                                            <p class="text-xs text-gray-400">Rate is decreasing</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm text-gray-500">Shipper Spot Rate</p>
-                                            <p class="text-2xl font-bold text-gray-800">$1.86 <span class="text-sm font-normal text-red-500">(-$0.02)</span></p>
-                                            <p class="text-xs text-gray-400">Rate is increasing</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm text-gray-500">Shipper Contract Rate</p>
-                                            <p class="text-2xl font-bold text-gray-800">$1.95 <span class="text-sm font-normal text-red-500">(-$0.06)</span></p>
-                                            <p class="text-xs text-gray-400">Rate is decreasing</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm text-gray-500">Fuel Surcharge</p>
-                                            <p class="text-2xl font-bold text-gray-800">$0.41 <span class="text-sm font-normal text-gray-500">($0.00)</span></p>
-                                            <p class="text-xs text-gray-400">Rate is neutral</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Chart Card -->
-                                <div class="bg-white p-6 rounded-lg shadow-sm">
-                                    <div class="flex justify-end mb-4">
-                                        <div class="flex text-sm text-gray-500 border rounded-md">
-                                            <button class="px-3 py-1 hover:bg-gray-100 rounded-l-md">3M</button>
-                                            <button class="px-3 py-1 hover:bg-gray-100 border-l">6M</button>
-                                            <button class="px-3 py-1 bg-gray-100 font-semibold text-gray-800 border-l rounded-r-md">1Y</button>
-                                        </div>
-                                    </div>
-                                    <svg viewBox="0 0 800 400" class="w-full h-auto">
-                                        <!-- Chart content drawn here -->
-                                        <line x1="50" y1="350" x2="780" y2="350" stroke="#d1d5db" />
-                                        <line x1="50" y1="50" x2="50" y2="350" stroke="#d1d5db" />
-                                        <polyline points="70,200 140,190 210,195 280,185 350,190 420,180 490,185 560,175 630,180 700,175 770,180" fill="none" stroke="#3b82f6" stroke-width="2"/>
-                                        <polyline points="70,250 140,240 210,245 280,235 350,240 420,230 490,235 560,225 630,230 700,225 770,230" fill="none" stroke="#ef4444" stroke-width="2"/>
-                                        <polyline points="70,300 140,290 210,295 280,285 350,290 420,280 490,285 560,275 630,280 700,275 770,280" fill="none" stroke="#f59e0b" stroke-width="2"/>
-                                    </svg>
-                                    <div class="flex justify-center flex-wrap gap-4 mt-4 text-xs">
-                                        <label class="flex items-center"><input type="checkbox" checked class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500"> <span class="ml-2">Broker Spot</span></label>
-                                        <label class="flex items-center"><input type="checkbox" checked class="h-4 w-4 rounded text-orange-500 focus:ring-orange-500"> <span class="ml-2">Broker Spot without Fuel</span></label>
-                                        <label class="flex items-center"><input type="checkbox" checked class="h-4 w-4 rounded text-red-600 focus:ring-red-500"> <span class="ml-2">Shipper Spot</span></label>
-                                        <label class="flex items-center"><input type="checkbox" checked class="h-4 w-4 rounded text-indigo-600 focus:ring-indigo-500"> <span class="ml-2">Shipper Spot without Fuel</span></label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="space-y-6">
-                                <!-- State and Regional Downloads -->
-                                <div class="bg-white p-6 rounded-lg shadow-sm">
-                                    <h3 class="font-semibold text-gray-800 mb-2">State and Regional Downloads</h3>
-                                    <p class="text-xs text-gray-500 mb-4">Timeframe: 30 Day | With DAT fuel surcharge ($0.41)</p>
-                                    <div class="space-y-2 text-sm">
-                                        <p class="font-semibold text-gray-700">State</p>
-                                        <a href="#" class="text-blue-600 hover:underline">BROKER SPOT <i data-lucide="download-cloud" class="inline w-4 h-4"></i></a>
-                                        <a href="#" class="text-blue-600 hover:underline ml-2">SHIPPER CONTRACT <i data-lucide="download-cloud" class="inline w-4 h-4"></i></a>
-                                        <p class="font-semibold text-gray-700 mt-2">Regional</p>
-                                        <a href="#" class="text-blue-600 hover:underline">BROKER SPOT <i data-lucide="download-cloud" class="inline w-4 h-4"></i></a>
-                                        <a href="#" class="text-blue-600 hover:underline ml-2">SHIPPER CONTRACT <i data-lucide="download-cloud" class="inline w-4 h-4"></i></a>
-                                    </div>
-                                </div>
-                                <!-- DAT Weekly Update -->
-                                <div class="bg-white p-6 rounded-lg shadow-sm">
-                                    <h3 class="font-semibold text-gray-800 mb-4">DAT Weekly Update</h3>
-                                    <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden relative">
-                                        <img src="https://placehold.co/600x400/192129/FFFFFF?text=DAT+iQ+Market+Update" class="w-full h-full object-cover" alt="Market Update Video Thumbnail">
-                                        <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                                            <button class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-white"><i data-lucide="play" class="w-8 h-8 fill-current"></i></button>
-                                        </div>
-                                    </div>
-                                    <button class="mt-4 w-full bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 text-sm font-medium">Watch on <span class="font-bold">YouTube</span></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                lucide.createIcons();
-            }
-
-            function renderPageContent() {
-                if (currentNavType === 'One') {
-                    renderOneDashboard();
-                } else {
-                    renderIQDashboard();
-                }
-
-                const existingMessage = dynamicDashboardContent.querySelector('#accessDeniedMessage');
-                if (existingMessage) {
-                    existingMessage.remove();
-                }
-                pageOverlay.classList.toggle('hidden', currentUser.platform.includes(currentNavType));
-
-                if (!currentUser.platform.includes(currentNavType)) {
-                    dynamicDashboardContent.insertAdjacentHTML('beforeend', renderAccessDeniedMessage());
-                    lucide.createIcons();
-                }
-            }
-
-            function renderNav() {
-                const isOne = (currentNavType === 'One');
-                mainNavContainer.classList.toggle('w-64', isOne);
-                mainNavContainer.classList.toggle('w-20', !isOne);
-                
-                const bentoButtonHtml = isOne ? 
-                    `<a href="#" id="bentoButton" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md text-sm text-gray-300"><i data-lucide="layout-grid" class="w-5 h-5 mr-3"></i> More Tools</a>` :
-                    `<div id="bentoButton" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="layout-grid" class="w-6 h-6 text-gray-400 hover:text-white"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">More Tools</div></div>`;
-                
-                const divider = isOne ? `<div class="w-full border-t border-gray-600 my-2"></div>` : `<div class="w-16 border-t border-gray-600 my-1"></div>`;
-                 const supportLinks = isOne ? `
+            const isOne = (navToRender === 'One');
+            const navItems = isOne ? `
+                <div id="logoButton" class="self-stretch px-2 mb-6 flex justify-center cursor-pointer"><div class="w-16 h-12 bg-white rounded flex flex-col items-center justify-center text-gray-800 font-bold text-sm"><div>DAT</div><div class="font-extrabold text-lg">One</div></div></div>
+                <div class="self-stretch flex-1 flex flex-col items-start w-full text-sm text-gray-400">
+                    <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700"><i data-lucide="home" class="w-5 h-5 mr-3"></i> Dashboard</a>
+                    <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700"><i data-lucide="search" class="w-5 h-5 mr-3"></i> Search Loads</a>
+                    <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700"><i data-lucide="truck" class="w-5 h-5 mr-3"></i> Search Trucks</a>
                     <div class="w-full border-t border-gray-700 my-2"></div>
-                    <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="message-square" class="w-5 h-5 mr-3"></i> Live Support</a>
-                    <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="book-open" class="w-5 h-5 mr-3"></i> Help Center</a>
-                ` : `
-                    <div class="w-16 border-t border-gray-600 my-1"></div>
-                    <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="message-square" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">Live Support</div></div>
-                    <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="book-open" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">Help Center</div></div>
-                `;
+                    <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700"><i data-lucide="download" class="w-5 h-5 mr-3"></i> My Shipments</a>
+                    <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700"><i data-lucide="settings" class="w-5 h-5 mr-3"></i> Advanced Posting</a>
+                    <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700"><i data-lucide="truck" class="w-5 h-5 mr-3"></i> My Trucks</a>
+                    <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700"><i data-lucide="package" class="w-5 h-5 mr-3"></i> My Loads</a>
+                </div>
+            ` : `
+                <div id="logoButton" class="self-stretch px-2 mb-6 flex justify-center cursor-pointer"><div class="w-16 h-12 bg-white rounded flex flex-col items-center justify-center text-gray-800 font-bold text-sm"><div>DAT</div><div class="font-extrabold text-lg">iQ</div></div></div>
+                <div class="self-stretch flex-1 flex flex-col items-start gap-2" id="navContainer">
+                    <div data-selected="true" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="home" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">Dashboard</div></div>
+                    <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="wrench" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">RateView</div></div>
+                    <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="file-text" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">Rateview<br>Multi-Lane</div></div>
+                    <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="clipboard-list" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">RFP Tool</div></div>
+                    <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="clock" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">Market<br>Conditions</div></div>
+                    <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="bar-chart-3" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">Benchmark</div></div>
+                    <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="grid" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">More Tools</div></div>
+                </div>
+            `;
+            
+            mainNavContainer.innerHTML = navItems + `<div class="self-stretch mt-auto flex flex-col items-center"><div class="py-4"><div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center cursor-pointer"><i data-lucide="help-circle" class="w-6 h-6 stroke-white"></i></div></div><div class="self-stretch border-t border-Web-Border-Container-Primary flex justify-center py-4"><div id="avatarButton" class="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-white text-sm font-medium cursor-pointer">${currentUser.initials}</div></div></div>`;
+            mainNavContainer.className = `h-screen pt-6 bg-Web-Fill-Navigation-Default flex flex-col items-center ${isOne ? 'w-64' : 'w-20'}`;
+            
+            currentNavType = navToRender;
 
-                const navItems = isOne ? `
-                    <div id="logoButton" class="self-stretch px-2 mb-6 flex justify-center"><div class="w-auto h-12 bg-white rounded flex items-center justify-center text-gray-800 font-bold text-sm px-4"><div>DAT <span class="font-extrabold text-lg">One Freight</span></div></div></div>
-                    ${bentoButtonHtml}
-                    ${divider}
-                    <div class="self-stretch flex-1 flex flex-col items-start w-full text-sm text-gray-300">
-                        <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="home" class="w-5 h-5 mr-3"></i> Dashboard</a>
-                        <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="search" class="w-5 h-5 mr-3"></i> Search Loads</a>
-                        <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="truck" class="w-5 h-5 mr-3"></i> Search Trucks</a>
-                        <div class="w-full border-t border-gray-700 my-2"></div>
-                        <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="download" class="w-5 h-5 mr-3"></i> My Shipments</a>
-                        <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="settings" class="w-5 h-5 mr-3"></i> Advanced Posting</a>
-                        <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="truck" class="w-5 h-5 mr-3"></i> My Trucks</a>
-                        <a href="#" class="w-full flex items-center py-2 px-4 hover:bg-gray-700 rounded-md"><i data-lucide="package" class="w-5 h-5 mr-3"></i> My Loads</a>
-                        ${supportLinks}
-                    </div>
-                ` : `
-                    <div id="logoButton" class="self-stretch px-2 mb-6 flex justify-center"><div class="w-16 h-12 bg-white rounded flex flex-col items-center justify-center text-gray-800 font-bold text-sm"><div>DAT</div><div class="font-extrabold text-lg">iQ</div></div></div>
-                    ${bentoButtonHtml}
-                    ${divider}
-                    <div class="self-stretch flex-1 flex flex-col items-start gap-2" id="navContainer">
-                        <div data-selected="true" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="home" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">Dashboard</div></div>
-                        <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="wrench" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">RateView</div></div>
-                        <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="file-text" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">Rateview<br>Multi-Lane</div></div>
-                        <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="clipboard-list" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">RFP Tool</div></div>
-                        <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="clock" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">Market<br>Conditions</div></div>
-                        <div data-selected="false" class="nav-item w-full cursor-pointer py-2 flex flex-col items-center gap-1"><div class="w-6 h-6 flex items-center justify-center"><i data-lucide="bar-chart-3" class="icon-default w-6 h-6 stroke-[1.5]"></i></div><div class="w-full text-center text-Web-Text-Navigation-Default text-[11px] leading-tight tracking-tight">Benchmark</div></div>
-                         ${supportLinks}
-                    </div>
-                `;
-                
-                mainNavContainer.innerHTML = navItems + `<div class="self-stretch mt-auto flex flex-col items-center"><div class="self-stretch border-t border-Web-Border-Container-Primary flex justify-center py-4"><div id="avatarButton" class="w-10 h-10 ${currentUser.color} rounded-full flex items-center justify-center text-white text-sm font-medium cursor-pointer">${currentUser.initials}</div></div></div>`;
-                
-                lucide.createIcons();
-            }
+            lucide.createIcons();
+        }
 
-            function updateAccountList(searchTerm, listElement, currentUserElement, isLogin = false) {
-                const lowerCaseSearchTerm = searchTerm ? searchTerm.toLowerCase() : '';
-                
-                const filteredUsers = searchTerm ? users.filter(user => 
-                    user.name.toLowerCase().includes(lowerCaseSearchTerm) ||
-                    user.company.toLowerCase().includes(lowerCaseSearchTerm) ||
-                    user.email.toLowerCase().includes(lowerCaseSearchTerm) ||
-                    user.roles.some(role => role.toLowerCase().includes(lowerCaseSearchTerm)) ||
-                    user.subscriptions.some(sub => sub.toLowerCase().includes(lowerCaseSearchTerm)) ||
-                    user.mcDotNumber.toLowerCase().includes(lowerCaseSearchTerm)
-                ) : users;
+        function updatePlatformMenu() {
+            const availablePlatforms = [];
+            if (currentUser.platform.includes('iQ')) availablePlatforms.push('iQ');
+            if (currentUser.platform.includes('One') || currentUser.platform.includes('ONE')) availablePlatforms.push('One');
+            
+            platformList.innerHTML = availablePlatforms.map(p => `<label class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white cursor-pointer"><input type="radio" name="platform" value="${p}" class="mr-3" ${p === tempSelectedPlatform ? 'checked' : ''}>${p}</label>`).join('');
+        }
 
-                if(currentUserElement) {
-                    const currentUserHtml = `<div class="px-4 py-3 border-b ${isLogin ? 'border-gray-200' : 'border-gray-700'}"><div class="flex items-center"><div class="w-8 h-8 mr-3 ${currentUser.color} rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0">${currentUser.initials}</div>${getUserDisplay(currentUser, isLogin)}</div></div>`;
-                    currentUserElement.innerHTML = currentUserHtml;
-                }
+        function updateUI() {
+            renderNav();
 
-                const itemClasses = isLogin ? 'text-gray-800 hover:bg-gray-100' : 'text-gray-300 hover:bg-gray-700 hover:text-white';
-                const iconClasses = isLogin ? 'text-gray-500 hover:text-gray-800' : 'text-gray-500 hover:text-white';
-
-                const otherUsersHtml = filteredUsers.filter(u => u.id !== currentUser.id || isLogin)
-                    .map(u => {
-                        return `<div data-id="${u.id}" class="flex items-center px-4 py-2 text-sm ${itemClasses} cursor-pointer"><div class="w-8 h-8 mr-3 ${u.color} rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0">${u.initials}</div><div class="flex-1">${getUserDisplay(u, isLogin)}</div><div class="relative info-icon-container"><i data-lucide="info" class="w-4 h-4 ml-2 ${iconClasses}"></i></div></div>`
-                    }).join('');
-
-                listElement.innerHTML = otherUsersHtml;
-                lucide.createIcons();
-            }
-
-
-            function renderUserProfile() {
-                const adminLabel = currentUser.isAdmin ? ' <span class="text-base font-normal text-gray-500">- Admin</span>' : '';
-                profileNavHeader.innerHTML = `<div class="flex items-center"><div class="w-12 h-12 ${currentUser.color} rounded-full flex items-center justify-center text-white text-lg font-medium mr-3 flex-shrink-0">${currentUser.initials}</div>${getUserDisplay(currentUser)}</div>`;
-                
-                profileContent.innerHTML = `
-                    <header class="flex justify-between items-center mb-6"><h1 id="profilePageTitle" class="text-2xl font-bold text-gray-800">${currentUser.name}${adminLabel}</h1><p class="text-sm text-gray-500">Last Updated: Aug 25, 2025, by DAT</p></header>
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 space-y-6">
-                            <div class="bg-white p-6 rounded-lg shadow-md">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">User Details</h3>
-                                <div class="bg-blue-50 p-4 rounded-md text-blue-800 text-sm mb-6"><i data-lucide="info" class="inline w-4 h-4 mr-2"></i>To request changes to this section, contact DAT Support at (800) 541-5417.</div>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                     <div><label class="text-xs text-gray-500">First Name:</label><p class="text-gray-800 mt-1">${currentUser.fName}</p></div>
-                                     <div><label class="text-xs text-gray-500">Last Name:</label><p class="text-gray-800 mt-1">${currentUser.lName}</p></div>
-                                     <div><label class="text-xs text-gray-500">Login Email:</label><p class="text-gray-800 mt-1">${currentUser.email}</p></div>
-                                     <div><label class="text-xs text-gray-500">Contact Phone:</label><p class="text-gray-800 mt-1">${currentUser.phone}</p></div>
-                                     <div><label class="text-xs text-gray-500">Contact Alternate Phone:</label><p class="text-gray-800 mt-1">${currentUser.contactAlternatePhone}</p></div>
-                                     <div><label class="text-xs text-gray-500">Contact Email:</label><p class="text-gray-800 mt-1">${currentUser.contactEmail}</p></div>
-                                </div>
-                                <div class="mt-6 border-t pt-6"><a href="#" class="text-blue-600 font-semibold hover:underline">CHANGE PASSWORD</a><p class="text-sm text-gray-500 mt-1">We'll send you an email with a link to change your password.</p></div>
-                            </div>
-                            <div class="bg-white p-6 rounded-lg shadow-md">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Account Details</h3>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div><label class="text-xs text-gray-500">Account Name:</label><p class="text-gray-800 mt-1">${currentUser.company}</p></div>
-                                    <div><label class="text-xs text-gray-500">Site Location:</label><p class="text-gray-800 mt-1">${currentUser.location}</p></div>
-                                    <div><label class="text-xs text-gray-500">Office Code:</label><p class="text-gray-800 mt-1">${currentUser.officeCode}</p></div>
-                                    <div><label class="text-xs text-gray-500">MC/DOT Number:</label><p class="text-gray-800 mt-1">${currentUser.mcDotNumber}</p></div>
-                                    <div class="md:col-span-2"><label class="text-xs text-gray-500">Subscriptions:</label><p class="text-gray-800 mt-1">${currentUser.subscriptions.join(', ')}</p></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="space-y-6">
-                            <div class="bg-white p-6 rounded-lg shadow-md">
-                                <h4 class="font-semibold text-gray-700 mb-4">Account Switcher Display</h4>
-                                <div class="space-y-3">
-                                    <label class="flex items-center"><input type="checkbox" data-pref="company" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" ${globalDisplayPrefs.company ? 'checked' : ''}><span class="ml-2 text-sm text-gray-600">Account Name</span></label>
-                                    <label class="flex items-center"><input type="checkbox" data-pref="location" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" ${globalDisplayPrefs.location ? 'checked' : ''}><span class="ml-2 text-sm text-gray-600">Site Location</span></label>
-                                    <label class="flex items-center"><input type="checkbox" data-pref="officeCode" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" ${globalDisplayPrefs.officeCode ? 'checked' : ''}><span class="ml-2 text-sm text-gray-600">Office Code</span></label>
-                                    <label class="flex items-center"><input type="checkbox" data-pref="nickname" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" ${globalDisplayPrefs.nickname ? 'checked' : ''}><span class="ml-2 text-sm text-gray-600">Account Nickname:</span><input type="text" id="nicknameInput" value="${currentUser.nickname || ''}" class="ml-2 text-sm p-1 bg-gray-100 rounded border border-gray-300 w-full mt-1"></label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`;
-                lucide.createIcons();
+            // Update Current Account Displays
+            currentAccountDisplay.innerHTML = getUserDisplay(currentUser, true);
+            profileCurrentAccountDisplay.innerHTML = getUserDisplay(currentUser, true);
+            
+            // Filter and update account list in main pop-out
+            const mainFilteredUsers = filterUsers(accountSearchTerm).filter(u => u.id !== currentUser.id);
+            if(mainFilteredUsers.length === 0 && accountSearchTerm) {
+                accountList.innerHTML = '';
+                accountListNoMatch.classList.remove('hidden');
+            } else {
+                accountListNoMatch.classList.add('hidden');
+                accountList.innerHTML = mainFilteredUsers.map(u => `<div data-user-id="${u.id}" class="account-item flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white cursor-pointer">${getUserDisplay(u)}</div>`).join('');
             }
             
-            function handleNicknameChange(newNickname) {
-                const userToUpdate = users.find(u => u.id === currentUser.id);
-                if (userToUpdate) {
-                    userToUpdate.nickname = newNickname;
-                    currentUser.nickname = newNickname;
-                    updateAllUI(accountSearchInput.value);
-                }
-            }
+            // Update profile page nav header
+            profileNavHeader.innerHTML = `<div class="flex items-center"><div class="w-12 h-12 ${currentUser.color} rounded-full flex items-center justify-center text-white text-lg font-medium mr-3 flex-shrink-0">${currentUser.initials}</div><div>${getUserDisplay(currentUser, true)}</div></div>`;
 
-            function updateAllUI(searchTerm = '') {
-                renderNav();
-                renderPageContent();
-                updateAccountList(searchTerm, accountList, accountMenuCurrentUser);
-                if(userProfileView.classList.contains('hidden') === false) {
-                    renderUserProfile();
-                    updateAccountList(profileAccountSearchInput.value, profileAccountList, profileAccountMenuCurrentUser);
-                }
+            // Filter and update profile page account list
+            const profileFilteredUsers = filterUsers(profileAccountSearchTerm).filter(u => u.id !== currentUser.id);
+            if(profileFilteredUsers.length === 0 && profileAccountSearchTerm) {
+                 profileAccountList.innerHTML = '';
+                 profileAccountListNoMatch.classList.remove('hidden');
+            } else {
+                profileAccountListNoMatch.classList.add('hidden');
+                profileAccountList.innerHTML = profileFilteredUsers.map(u => `<div data-user-id="${u.id}" class="account-item flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white cursor-pointer">${getUserDisplay(u)}</div>`).join('');
             }
-
-            // --- Event Listeners ---
             
-            document.body.addEventListener('click', (e) => {
-                const avatarButton = e.target.closest('#avatarButton');
-                const bentoButton = e.target.closest('#bentoButton');
-                const platformLink = e.target.closest('[data-platform]');
-                const accountInfoLinkTarget = e.target.closest('#platformAccountInfoLink');
-                const backToAppTarget = e.target.closest('#backToApp');
-                const toolsLinkTarget = e.target.closest('#toolsLink');
-                const logoutButtonTarget = e.target.closest('#logoutButton');
-                const profileNavHeaderTarget = e.target.closest('#profileNavHeader');
-                const userItem = e.target.closest('[data-id]');
-                const clearSearch = e.target.closest('#clearSearchButton');
-                const profileClearSearch = e.target.closest('#profileClearSearchButton');
-                 
-                if (avatarButton) {
-                    e.stopPropagation();
-                    updateAccountList('', accountList, accountMenuCurrentUser);
-                    accountMenu.classList.toggle('hidden');
-                } else if (bentoButton) {
-                     e.stopPropagation();
-                    const iqOption = platformSwitcherMenu.querySelector('[data-platform="iQ"]');
-                    const oneOption = platformSwitcherMenu.querySelector('[data-platform="One"]');
-                    iqOption.classList.toggle('platform-disabled', !currentUser.platform.includes('iQ'));
-                    oneOption.classList.toggle('platform-disabled', !currentUser.platform.includes('One'));
+            lucide.createIcons();
+        }
 
-                    const bentoRect = bentoButton.getBoundingClientRect();
-                    platformSwitcherMenu.style.top = `${bentoRect.top}px`;
-                    platformSwitcherMenu.style.left = `${bentoRect.right + 8}px`;
+
+        function renderUserProfile() {
+            profileContent.innerHTML = `
+                <div class="space-y-8">
+                    <!-- User Details Card -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">User Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm">
+                            <div>
+                                <label class="text-xs text-gray-500">Username</label>
+                                <p class="text-gray-800 font-medium">${currentUser.name}</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Full Name</label>
+                                <p class="text-gray-800 font-medium">${currentUser.fName} ${currentUser.lName}</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Login Email</label>
+                                <p class="text-gray-800 font-medium">${currentUser.email}</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Contact Phone</label>
+                                <p class="text-gray-800 font-medium">${currentUser.phone}</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="text-xs text-gray-500">Salesforce & CSB Roles</label>
+                                <p class="text-gray-800 font-medium">${currentUser.roles.join(', ')}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Account Details Card -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Account Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-sm">
+                            <div>
+                                <label class="text-xs text-gray-500">Account Name</label>
+                                <p class="text-gray-800 font-medium">${currentUser.company}</p>
+                            </div>
+                             <div>
+                                <label class="text-xs text-gray-500">Site Location</label>
+                                <p class="text-gray-800 font-medium">${currentUser.location}</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Office Code</label>
+                                <p class="text-gray-800 font-medium">${currentUser.officeCode}</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">MC/DOT Number</label>
+                                <p class="text-gray-800 font-medium">${currentUser.mcDotNumber}</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="text-xs text-gray-500">Subscriptions</label>
+                                <p class="text-gray-800 font-medium">${[...new Set(currentUser.subscriptions)].join(', ')}</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="text-xs text-gray-500">Admin Notes</label>
+                                <textarea id="adminNotesInput" rows="3" class="w-full mt-1 text-sm rounded bg-gray-50 p-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed" ${currentUser.isAdmin ? '' : 'disabled'}>${currentUser.adminNotes || ''}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Account Switcher Display Card -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Account Switcher Display</h3>
+                        <div class="space-y-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" data-pref="location" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" ${globalDisplayPrefs.location ? 'checked' : ''}>
+                                <span class="ml-3 text-sm text-gray-700">Site Location</span>
+                            </label>
+                             <label class="flex items-center">
+                                <input type="checkbox" data-pref="officeCode" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" ${globalDisplayPrefs.officeCode ? 'checked' : ''}>
+                                <span class="ml-3 text-sm text-gray-700">Office Code</span>
+                            </label>
+                            <div class="flex items-center pt-1">
+                                <input type="checkbox" data-pref="userNotes" id="userNotesCheckbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" ${globalDisplayPrefs.userNotes ? 'checked' : ''}>
+                                <label for="userNotesCheckbox" class="ml-3 text-sm text-gray-700 mr-4">User Notes</label>
+                                <input type="text" id="userNotesInput" value="${currentUser.userNotes || ''}" placeholder="Enter user notes" class="text-sm w-full max-w-xs rounded bg-gray-50 p-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-200 disabled:cursor-not-allowed" ${!globalDisplayPrefs.userNotes ? 'disabled' : ''}>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            lucide.createIcons();
+        }
+        
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => { updateUI(); lucide.createIcons(); });
+        
+        mainNavContainer.addEventListener('click', (e) => {
+            const avatarButton = e.target.closest('#avatarButton');
+            const logoButton = e.target.closest('#logoButton');
+            const navItem = e.target.closest('.nav-item');
+
+            if (avatarButton) {
+                e.stopPropagation();
+                accountSearchInput.value = ''; // Clear search on open
+                accountSearchTerm = '';
+                updateUI();
+                accountMenu.classList.toggle('hidden');
+            } else if (logoButton) {
+                e.stopPropagation();
+                tempSelectedPlatform = currentNavType;
+                updatePlatformMenu();
+                platformMenu.classList.toggle('hidden');
+            } else if (navItem && navItem.parentElement.id === 'navContainer') {
+                // Handle nav item selection for iQ style nav
+                const currentSelected = mainNavContainer.querySelector('.nav-item[data-selected="true"]');
+                if (currentSelected) {
+                    currentSelected.dataset.selected = 'false';
+                }
+                navItem.dataset.selected = 'true';
+            }
+        });
+
+        if (platformContinueButton) { platformContinueButton.addEventListener('click', (e) => { e.stopPropagation(); currentNavType = tempSelectedPlatform; renderNav(); platformMenu.classList.add('hidden'); }); }
+        if (accountInfoLink) { accountInfoLink.addEventListener('click', (e) => { e.preventDefault(); renderUserProfile(); mainAppView.classList.add('hidden'); userProfileView.classList.remove('hidden'); accountMenu.classList.add('hidden'); }); }
+        if (backToApp) { backToApp.addEventListener('click', () => { userProfileView.classList.add('hidden'); mainAppView.classList.remove('hidden'); }); }
+        if (toolsLink) { toolsLink.addEventListener('click', (e) => { e.preventDefault(); userProfileView.classList.add('hidden'); mainAppView.classList.remove('hidden'); }); }
+        if (showMoreAccountsButton) { showMoreAccountsButton.addEventListener('click', (e) => { e.stopPropagation(); profileAccountSearchInput.value = ''; profileAccountSearchTerm = ''; updateUI(); const icon = showMoreAccountsButton.querySelector('svg'); if (profileAccountListContainer.style.maxHeight) { profileAccountListContainer.style.maxHeight = null; icon.classList.remove('rotate-180'); } else { profileAccountListContainer.style.maxHeight = profileAccountListContainer.scrollHeight + "px"; icon.classList.add('rotate-180'); } }); }
+        
+        if (platformList) { platformList.addEventListener('change', (e) => { if(e.target.name === 'platform') { tempSelectedPlatform = e.target.value; } }); }
+        
+        // Account switching logic
+        accountList.addEventListener('click', (e) => {
+            const accountItem = e.target.closest('.account-item');
+            if(accountItem) {
+                const userId = parseInt(accountItem.dataset.userId);
+                currentUser = users.find(u => u.id === userId) || currentUser;
+                updateUI();
+                accountMenu.classList.add('hidden');
+            }
+        });
+
+        profileAccountList.addEventListener('click', (e) => {
+            const accountItem = e.target.closest('.account-item');
+            if(accountItem) {
+                const userId = parseInt(accountItem.dataset.userId);
+                currentUser = users.find(u => u.id === userId) || currentUser;
+                renderUserProfile(); // Rerender profile page with new user data
+                updateUI();
+                 // Close the dropdown
+                profileAccountListContainer.style.maxHeight = null;
+                const icon = showMoreAccountsButton.querySelector('svg');
+                if(icon) { icon.classList.remove('rotate-180'); }
+            }
+        });
+        
+        profileContent.addEventListener('input', (e) => {
+            const userToUpdate = users.find(u => u.id === currentUser.id);
+            if (!userToUpdate) return;
+            
+            if (e.target.id === 'userNotesInput') {
+                userToUpdate.userNotes = e.target.value;
+                currentUser.userNotes = e.target.value;
+                updateUI(); // Update switchers in real-time
+            }
+
+            if (e.target.id === 'adminNotesInput' && currentUser.isAdmin) {
+                userToUpdate.adminNotes = e.target.value;
+                currentUser.adminNotes = e.target.value;
+                // No UI update needed as it doesn't affect the switcher
+            }
+        });
+
+        profileContent.addEventListener('change', (e) => {
+            if (e.target.type === 'checkbox' && e.target.dataset.pref) {
+                const pref = e.target.dataset.pref;
+                globalDisplayPrefs[pref] = e.target.checked;
+                // When userNotes checkbox changes, re-render user profile to enable/disable input
+                renderUserProfile();
+                updateUI(); // This will update the switchers
+            }
+        });
+
+        // Search input listeners
+        if(accountSearchInput) { accountSearchInput.addEventListener('input', (e) => { accountSearchTerm = e.target.value; updateUI(); }); }
+        if(profileAccountSearchInput) { profileAccountSearchInput.addEventListener('input', (e) => { profileAccountSearchTerm = e.target.value; updateUI(); }); }
+
+
+        userProfileView.addEventListener('click', (e) => {
+            const profileNavItem = e.target.closest('.profile-nav-item');
+            if (profileNavItem) {
+                e.preventDefault();
+                const navContainer = profileNavItem.closest('nav');
+                if (navContainer) {
+                    const currentActive = navContainer.querySelector('.active');
+                    if (currentActive) currentActive.classList.remove('active');
+                    profileNavItem.classList.add('active');
+
+                    // Change content based on selection
+                    const linkText = profileNavItem.innerText.trim();
+                    const iconName = profileNavItem.dataset.iconName;
+
+                    if (linkText !== 'User Profile') {
+                        if (!iconName) { // Guard against missing icon name
+                            console.error("Could not find icon name for nav item:", profileNavItem);
+                            return;
+                        }
+                        profileContent.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-md h-full flex flex-col items-center justify-center text-center">
+                            <i data-lucide="${iconName}" class="w-16 h-16 text-gray-300 mb-4"></i>
+                            <h1 class="text-2xl font-bold text-gray-800">${linkText}</h1>
+                            <p class="mt-2 text-gray-600 max-w-md">This is a placeholder page for the "${linkText}" section. All of the relevant tools and content would be displayed here.</p>
+                        </div>`;
+                        lucide.createIcons();
+                    } else {
+                        renderUserProfile(); // Re-render the main profile content
+                    }
+                }
+            }
+        });
+
+        // --- Tooltip Logic ---
+        function showTooltip(e) {
+            const target = e.target.closest('.account-info-icon');
+            if (!target) return;
+
+            const userId = parseInt(target.dataset.userId);
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+
+            const userNotesHTML = user.userNotes ? `<div class="mt-2 pt-2 border-t border-gray-600">
+                <h5 class="font-bold text-gray-300">User Notes</h5>
+                <p class="italic text-yellow-300">"${user.userNotes}"</p>
+            </div>` : '';
+
+            const adminNotesHTML = user.adminNotes ? `<div class="mt-2 pt-2 border-t border-gray-600">
+                <h5 class="font-bold text-gray-300">Admin Notes</h5>
+                <p>${user.adminNotes}</p>
+            </div>` : '';
+
+            // Populate tooltip
+            accountTooltip.innerHTML = `
+                <div class="space-y-1">
+                    <h4 class="font-bold text-base mb-2 border-b border-gray-600 pb-1">${user.company}</h4>
                     
-                    platformSwitcherMenu.classList.toggle('hidden');
-                } else if (platformLink && !platformLink.classList.contains('platform-disabled')) {
-                    e.preventDefault();
-                    currentNavType = platformLink.dataset.platform;
-                    if(pageOverlay) pageOverlay.classList.add('hidden');
-                    updateAllUI();
-                    platformSwitcherMenu.classList.add('hidden');
-                    accountMenu.classList.add('hidden');
-                } else if (accountInfoLinkTarget) {
-                     e.preventDefault(); 
-                     renderUserProfile(); 
-                     mainAppView.classList.add('hidden'); 
-                     userProfileView.classList.remove('hidden'); 
-                     accountMenu.classList.add('hidden');
-                     platformSwitcherMenu.classList.add('hidden');
-                } else if (backToAppTarget) {
-                    userProfileView.classList.add('hidden'); mainAppView.classList.remove('hidden');
-                } else if (toolsLinkTarget) {
-                     e.preventDefault(); userProfileView.classList.add('hidden'); mainAppView.classList.remove('hidden');
-                } else if (logoutButtonTarget) {
-                     e.preventDefault(); mainAppView.classList.add('hidden'); userProfileView.classList.add('hidden'); loginView.classList.remove('hidden'); accountMenu.classList.add('hidden');
-                } else if(profileNavHeaderTarget) {
-                    e.stopPropagation();
-                    updateAccountList('', profileAccountList, profileAccountMenuCurrentUser);
-                    const navHeaderRect = profileNavHeader.getBoundingClientRect();
-                    profileAccountMenu.style.top = `${navHeaderRect.bottom + 4}px`;
-                    profileAccountMenu.style.left = `${navHeaderRect.left}px`;
-                    profileAccountMenu.classList.toggle('hidden');
-                } else if (userItem) {
-                    const listContainer = userItem.parentElement;
-                    const userId = parseInt(userItem.dataset.id);
-                    if (listContainer.id === 'accountList') {
-                         currentUser = users.find(u => u.id === userId) || currentUser;
-                         pageOverlay.classList.toggle('hidden', currentUser.platform.includes(currentNavType));
-                         updateAllUI(accountSearchInput.value);
-                         accountMenu.classList.add('hidden'); 
-                    } else if (listContainer.id === 'profileAccountList') {
-                         currentUser = users.find(u => u.id === userId) || currentUser;
-                         updateAllUI(profileAccountSearchInput.value);
-                         profileAccountMenu.classList.add('hidden');
-                    }
-                } else if(clearSearch) {
-                    accountSearchInput.value = '';
-                    updateAccountList('', accountList, accountMenuCurrentUser);
-                    clearSearch.classList.add('hidden');
-                } else if (profileClearSearch) {
-                    profileAccountSearchInput.value = '';
-                    updateAccountList('', profileAccountList, profileAccountMenuCurrentUser);
-                    profileClearSearch.classList.add('hidden');
-                }
+                    <h5 class="font-bold text-gray-300">User Details</h5>
+                    <p><span class="font-semibold text-gray-400">Full Name:</span> ${user.fName} ${user.lName}</p>
+                    <p><span class="font-semibold text-gray-400">Username:</span> ${user.name}</p>
+                    <p><span class="font-semibold text-gray-400">Email:</span> ${user.email}</p>
+                    <p><span class="font-semibold text-gray-400">Phone:</span> ${user.phone}</p>
+                    <p><span class="font-semibold text-gray-400">Roles:</span> ${user.roles.join(', ')}</p>
 
-                // Close menus if clicking outside
-                if (!e.target.closest('.account-menu') && !e.target.closest('#avatarButton') && !e.target.closest('#userInfoPopup')) {
-                    accountMenu.classList.add('hidden');
-                    userInfoPopup.classList.add('hidden');
-                }
-                 if (!e.target.closest('#platformSwitcherMenu') && !e.target.closest('#bentoButton')) {
-                    platformSwitcherMenu.classList.add('hidden');
-                }
-                 if (!e.target.closest('#profileAccountMenu') && !e.target.closest('#profileNavHeader')) {
-                    profileAccountMenu.classList.add('hidden');
-                }
+                    <div class="mt-2 pt-2 border-t border-gray-600">
+                        <h5 class="font-bold text-gray-300">Account Details</h5>
+                        <p><span class="font-semibold text-gray-400">Location:</span> ${user.location}</p>
+                        <p><span class="font-semibold text-gray-400">Office:</span> ${user.officeCode}</p>
+                        <p><span class="font-semibold text-gray-400">MC/DOT:</span> ${user.mcDotNumber}</p>
+                        <p><span class="font-semibold text-gray-400">Subscriptions:</span> ${[...new Set(user.subscriptions)].join(', ')}</p>
+                    </div>
 
-            });
+                    ${userNotesHTML}
+                    ${adminNotesHTML}
+                </div>
+            `;
 
-            document.body.addEventListener('mouseover', e => {
-                const infoContainer = e.target.closest('.info-icon-container');
-                 if (infoContainer) {
-                    clearTimeout(infoPopupTimeout);
-                    const userItem = infoContainer.closest('[data-id]');
-                    const userId = parseInt(userItem.dataset.id);
-                    const user = users.find(u => u.id === userId);
-                    renderInfoPopup(user);
-                    const menuRect = infoContainer.closest('.account-menu').getBoundingClientRect();
-                    userInfoPopup.style.left = `${menuRect.right + 8}px`;
-                    userInfoPopup.style.top = `${menuRect.top}px`;
-                    userInfoPopup.classList.remove('hidden');
-                }
-            });
-
-             document.body.addEventListener('mouseout', e => {
-                 const infoContainer = e.target.closest('.info-icon-container');
-                 if(infoContainer) {
-                    infoPopupTimeout = setTimeout(() => {
-                        userInfoPopup.classList.add('hidden');
-                    }, 200);
-                 }
-            });
-
+            // Position tooltip
+            const rect = target.getBoundingClientRect();
+            accountTooltip.style.left = `${rect.right + 10}px`;
             
-            if (userInfoPopup) {
-                userInfoPopup.addEventListener('mouseover', () => clearTimeout(infoPopupTimeout));
-                userInfoPopup.addEventListener('mouseout', () => {
-                    infoPopupTimeout = setTimeout(() => {
-                        userInfoPopup.classList.add('hidden');
-                    }, 200);
-                });
+            // Adjust vertical position to prevent overflow
+            const tooltipHeight = accountTooltip.offsetHeight;
+            const windowHeight = window.innerHeight;
+            let topPosition = rect.top;
+
+            if (topPosition + tooltipHeight > windowHeight - 20) { // 20px buffer
+                topPosition = windowHeight - tooltipHeight - 20;
             }
-            
-            if (profileContent) {
-                profileContent.addEventListener('input', (e) => { 
-                    if (e.target.id === 'nicknameInput') {
-                        handleNicknameChange(e.target.value);
-                    }
-                });
-                profileContent.addEventListener('change', (e) => { 
-                    if (e.target.type === 'checkbox' && e.target.dataset.pref) { 
-                        const pref = e.target.dataset.pref; 
-                        globalDisplayPrefs[pref] = e.target.checked; 
-                        updateAllUI(); 
-                        renderUserProfile(); 
-                    } 
-                });
-            }
-            
-            if (accountSearchInput) {
-                accountSearchInput.addEventListener('input', (e) => {
-                    const searchTerm = e.target.value;
-                    updateAccountList(searchTerm, accountList, accountMenuCurrentUser);
-                    clearSearchButton.classList.toggle('hidden', searchTerm.length === 0);
-                });
+            if (topPosition < 20) {
+                topPosition = 20;
             }
 
-            if (profileAccountSearchInput) {
-                profileAccountSearchInput.addEventListener('input', (e) => {
-                    const searchTerm = e.target.value;
-                    updateAccountList(searchTerm, profileAccountList, profileAccountMenuCurrentUser);
-                    profileClearSearchButton.classList.toggle('hidden', searchTerm.length === 0);
-                });
-            }
-            
-             if (loginForm) {
-                 loginForm.addEventListener('submit', (e) => {
-                    e.preventDefault(); 
-                    loginView.classList.add('hidden');
-                    mainAppView.classList.remove('hidden');
-                    currentNavType = 'One';
-                    updateAllUI();
-                });
-            }
-            
-            updateAllUI();
+            accountTooltip.style.top = `${topPosition}px`;
+            accountTooltip.classList.remove('hidden');
+        }
+
+        function hideTooltip() {
+            accountTooltip.classList.add('hidden');
+        }
+        
+        accountList.addEventListener('mouseover', showTooltip);
+        accountList.addEventListener('mouseout', hideTooltip);
+
+        profileAccountList.addEventListener('mouseover', showTooltip);
+        profileAccountList.addEventListener('mouseout', hideTooltip);
+
+
+        window.addEventListener('click', (e) => {
+            if (accountMenu && !accountMenu.contains(e.target) && !e.target.closest('#avatarButton')) { accountMenu.classList.add('hidden'); }
+            if (platformMenu && !platformMenu.contains(e.target) && !e.target.closest('#logoButton')) { platformMenu.classList.add('hidden'); }
         });
 
     </script>
