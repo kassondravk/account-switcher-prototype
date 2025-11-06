@@ -142,7 +142,8 @@
             cursor: pointer;
         }
         /* Clicks on header (not icon) should not be pointer */
-        .profile-card-header[data-card-id="accountSwitcherCard"] {
+        .profile-card-header[data-card-id="accountSwitcherCard"],
+        .profile-card-header[data-card-id="mobileNotificationsCard"] {
             cursor: default;
         }
         
@@ -185,6 +186,18 @@
            transition: border-color 0.2s ease, background-color 0.2s ease;
            width: 100%;
         }
+        /* --- M3 Style for regular input --- */
+        .m3-text-field input {
+            border: none; 
+            outline: none; 
+            background-color: transparent;
+            width: 100%; 
+            font-size: 16px; 
+            color: #1D1B20; 
+            padding: 16px 16px 8px 16px; 
+            box-sizing: border-box; 
+            height: 52px; /* Fixed height for input */
+        }
         
          .m3-text-field textarea {
             border: none; 
@@ -212,6 +225,10 @@
             background-color: #ffffff; /* Match container bg */
             padding: 0 4px; /* Add horizontal padding */
         }
+        /* --- Adjust label for standard input --- */
+        .m3-text-field input + label {
+            top: 15px; /* Slightly adjust for input height */
+        }
 
         /* Label float styles */
         .m3-text-field.focused label,
@@ -230,15 +247,24 @@
          .m3-text-field.focused textarea {
              padding: 15px 15px 7px 15px; /* Adjust by 1px to account for 2px border */
          }
+         .m3-text-field.focused input {
+             padding: 15px 15px 7px 15px;
+         }
          .m3-text-field.focused label {
              top: -11px; /* Adjust by 1px for 2px border */
          }
+         /* --- Adjust label for input focus --- */
+         .m3-text-field.focused input + label {
+             top: -11px;
+         }
+
 
          .m3-text-field.disabled {
             border-color: rgba(29, 27, 32, 0.12);
             background-color: #f9fafb; /* bg-gray-50 */
          }
-         .m3-text-field.disabled textarea {
+         .m3-text-field.disabled textarea,
+         .m3-text-field.disabled input {
              color: rgba(29, 27, 32, 0.38);
              cursor: not-allowed;
              background-color: #f9fafb; /* bg-gray-50 */
@@ -485,8 +511,9 @@
         let cardStates = {
             userDetails: false, // Default to expanded per screenshot
             accountSwitcher: false, // Default to expanded
-            accountSwitcherEditMode: false, // --- NEW: Edit mode state ---
+            accountSwitcherEditMode: false, 
             mobileNotifications: false, // Default to expanded
+            mobileNotificationsEditMode: false, // --- NEW ---
             authorityLevel: false // Default to expanded
         };
 
@@ -718,18 +745,13 @@
         }
         
         // Helper to create a collapsible card
-        function createCollapsibleCard(id, title, content, summary, isCollapsed, actionIcon = null) {
+        function createCollapsibleCard(id, title, content, summary, isCollapsed) {
             const collapsedClass = isCollapsed ? 'collapsed' : '';
             const headerBorderClass = isCollapsed ? 'no-border' : '';
             const collapseIconName = isCollapsed ? 'plus' : 'minus';
             
             let actionButtonHTML = '';
             
-            // Default action icon (plus/minus or edit)
-            let defaultActionIcon = actionIcon ? 
-                `<i data-lucide="${actionIcon}" class="w-5 h-5 text-gray-600"></i>` : 
-                `<i data-lucide="${collapseIconName}" class="w-5 h-5 text-gray-600 collapse-icon"></i>`; // Added collapse-icon class
-
             // --- NEW: Special case for Account Switcher ---
             if (id === 'accountSwitcherCard') {
                 const editMode = cardStates.accountSwitcherEditMode;
@@ -745,11 +767,26 @@
                         <i data-lucide="${collapseIconName}" class="w-5 h-5 text-gray-600 collapse-icon"></i>
                     </div>
                 `;
-            } else {
-                 // --- Use default for other cards ---
-                actionButtonHTML = `<div class="card-action">${defaultActionIcon}</div>`;
+            } 
+            // --- NEW: Special case for Mobile Notifications ---
+            else if (id === 'mobileNotificationsCard') {
+                 const editMode = cardStates.mobileNotificationsEditMode;
+                const editButtonText = editMode ? 'SAVE' : 'EDIT';
+                const editButtonVisibility = isCollapsed ? 'hidden' : ''; 
+                
+                actionButtonHTML = `
+                    <div class="flex items-center space-x-4">
+                        <button data-action="toggle-edit-mobile-notifications" class="text-sm font-medium text-blue-600 hover:text-blue-800 ${editButtonVisibility}">
+                            ${editButtonText}
+                        </button>
+                        <i data-lucide="${collapseIconName}" class="w-5 h-5 text-gray-600 collapse-icon"></i>
+                    </div>
+                `;
             }
-            // --- END NEW ---
+            // --- Default for other cards ---
+            else {
+                actionButtonHTML = `<div class="card-action"><i data-lucide="${collapseIconName}" class="w-5 h-5 text-gray-600 collapse-icon"></i></div>`;
+            }
             
             return `
                 <div class="profile-card" id="${id}">
@@ -773,7 +810,9 @@
             // --- END FIX ---
 
             // --- NEW: Get edit mode state ---
-            const isEditMode = cardStates.accountSwitcherEditMode;
+            const isAccountSwitcherEditMode = cardStates.accountSwitcherEditMode;
+            const isMobileNotificationsEditMode = cardStates.mobileNotificationsEditMode;
+
 
             // User Details Card
             const userDetailsContent = `
@@ -802,10 +841,10 @@
             let adminNotesHTML = '';
             let userNotesHTML = '';
 
-            // --- NEW LOGIC: Checkboxes are *always* enabled. Text fields are toggled by editMode. ---
+            // --- NEW LOGIC: Checkboxes are *always* enabled. Text fields are toggled by isAccountSwitcherEditMode. ---
             
             // Admin Notes
-            let adminLabelText = `Admin Notes${(globalDisplayPrefs.adminNotes && currentUser.adminNotes && !isEditMode) ? ': ' + currentUser.adminNotes : ''}`;
+            let adminLabelText = `Admin Notes${(globalDisplayPrefs.adminNotes && currentUser.adminNotes && !isAccountSwitcherEditMode) ? ': ' + currentUser.adminNotes : ''}`;
             adminNotesHTML = `
                 <div class="space-y-2">
                     <label class="flex items-center ${globalDisplayPrefs.userNotes ? 'opacity-50 cursor-not-allowed' : ''}">
@@ -816,7 +855,7 @@
                         </span>
                         <i data-lucide="info" class="w-4 h-4 text-gray-400 ml-2"></i>
                     </label>
-                    ${isEditMode ? `
+                    ${isAccountSwitcherEditMode ? `
                     <div class="m3-text-field ${!globalDisplayPrefs.adminNotes ? 'disabled' : ''} ${currentUser.adminNotes ? 'filled' : ''}">
                         <label for="adminNotesInput">Admin Notes</label>
                         <textarea id="adminNotesInput" class="text-sm" ${!globalDisplayPrefs.adminNotes || !currentUser.isAdmin ? 'disabled' : ''}>${currentUser.adminNotes || ''}</textarea>
@@ -827,7 +866,7 @@
             `;
 
             // User Notes
-            let userLabelText = `User Notes${(globalDisplayPrefs.userNotes && currentUser.userNotes && !isEditMode) ? ': ' + currentUser.userNotes : ''}`;
+            let userLabelText = `User Notes${(globalDisplayPrefs.userNotes && currentUser.userNotes && !isAccountSwitcherEditMode) ? ': ' + currentUser.userNotes : ''}`;
             userNotesHTML = `
                 <div class="space-y-2">
                     <label class="flex items-center ${globalDisplayPrefs.adminNotes ? 'opacity-50 cursor-not-allowed' : ''}">
@@ -838,7 +877,7 @@
                         </span>
                          <i data-lucide="info" class="w-4 h-4 text-gray-400 ml-2"></i>
                     </label>
-                    ${isEditMode ? `
+                    ${isAccountSwitcherEditMode ? `
                     <div class="m3-text-field ${!globalDisplayPrefs.userNotes ? 'disabled' : ''} ${currentUser.userNotes ? 'filled' : ''}">
                         <label for="userNotesInput">User Notes</label>
                         <textarea id="userNotesInput" class="text-sm" ${!globalDisplayPrefs.userNotes ? 'disabled' : ''}>${currentUser.userNotes || ''}</textarea>
@@ -872,13 +911,21 @@
             const accountSwitcherSummaryContent = buildSummaryList();
 
 
-            // Mobile Notifications Card
+            // --- REWORKED: Mobile Notifications Card ---
             const mobileNotificationsContent = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                    ${createInfoField('Mobile Number for DAT One App', currentUser.mobileNumber || 'N/A', 'info')}
+                    ${isMobileNotificationsEditMode ? `
+                        <div class="m3-text-field ${currentUser.mobileNumber ? 'filled' : ''}">
+                            <input type="tel" id="mobileNumberInput" value="${currentUser.mobileNumber || ''}">
+                            <label for="mobileNumberInput">Mobile Number for DAT One App</label>
+                        </div>
+                    ` : 
+                        createInfoField('Mobile Number for DAT One App', currentUser.mobileNumber || 'N/A', 'info')
+                    }
                 </div>
             `;
             const mobileNotificationsSummary = `<p class="text-sm text-gray-500">Manage mobile number for DAT One app notifications.</p>`;
+            // --- END REWORK ---
 
             // Authority Level Card
             const authorityLevelContent = `
@@ -896,10 +943,10 @@
 
             // Assemble all cards
             profileCardContainer.innerHTML = `
-                ${createCollapsibleCard('userDetailsCard', 'User Details', userDetailsContent, userDetailsSummary, cardStates.userDetails, null)}
-                ${createCollapsibleCard('accountSwitcherCard', 'Account Switcher Display', accountSwitcherContent, accountSwitcherSummaryContent, cardStates.accountSwitcher, null)}
-                ${createCollapsibleCard('mobileNotificationsCard', 'Mobile Notifications', mobileNotificationsContent, mobileNotificationsSummary, cardStates.mobileNotifications, 'edit')}
-                ${createCollapsibleCard('authorityLevelCard', 'Authority Level', authorityLevelContent, authorityLevelSummary, cardStates.authorityLevel, null)}
+                ${createCollapsibleCard('userDetailsCard', 'User Details', userDetailsContent, userDetailsSummary, cardStates.userDetails)}
+                ${createCollapsibleCard('accountSwitcherCard', 'Account Switcher Display', accountSwitcherContent, accountSwitcherSummaryContent, cardStates.accountSwitcher)}
+                ${createCollapsibleCard('mobileNotificationsCard', 'Mobile Notifications', mobileNotificationsContent, mobileNotificationsSummary, cardStates.mobileNotifications)}
+                ${createCollapsibleCard('authorityLevelCard', 'Authority Level', authorityLevelContent, authorityLevelSummary, cardStates.authorityLevel)}
             `;
             
             lucide.createIcons();
@@ -917,19 +964,19 @@
             
             const textFields = profileCardContainer.querySelectorAll('.m3-text-field');
             textFields.forEach(field => {
-                const textarea = field.querySelector('textarea');
-                if (!textarea) return;
+                const input = field.querySelector('textarea, input'); // Handle both
+                if (!input) return;
                 
                 const updateState = () => {
-                    field.classList.toggle('filled', !!textarea.value);
+                    field.classList.toggle('filled', !!input.value);
                 };
 
-                textarea.addEventListener('focus', () => field.classList.add('focused'));
-                textarea.addEventListener('blur', () => {
+                input.addEventListener('focus', () => field.classList.add('focused'));
+                input.addEventListener('blur', () => {
                     field.classList.remove('focused');
                     updateState();
                 });
-                textarea.addEventListener('input', updateState);
+                input.addEventListener('input', updateState);
                 
                 // Initial state
                 updateState();
@@ -1076,6 +1123,9 @@
                     } else if (targetId === 'adminNotesInput' && currentUser.isAdmin) {
                         userToUpdate.adminNotes = value;
                         currentUser.adminNotes = value;
+                    } else if (targetId === 'mobileNumberInput') {
+                         userToUpdate.mobileNumber = value;
+                         currentUser.mobileNumber = value;
                     }
                     
                     const m3Field = e.target.closest('.m3-text-field');
@@ -1104,11 +1154,18 @@
                 
                 profileContent.addEventListener('click', (e) => {
                     const cardHeader = e.target.closest('.profile-card-header');
-                    const editButton = e.target.closest('[data-action="toggle-edit-account-switcher"]');
+                    const editButton = e.target.closest('[data-action]'); // Generalize for edit buttons
                     
                     if (editButton) {
                         e.stopPropagation(); 
-                        cardStates.accountSwitcherEditMode = !cardStates.accountSwitcherEditMode;
+                        const action = editButton.dataset.action;
+                        
+                        if(action === 'toggle-edit-account-switcher') {
+                            cardStates.accountSwitcherEditMode = !cardStates.accountSwitcherEditMode;
+                        } else if (action === 'toggle-edit-mobile-notifications') {
+                            cardStates.mobileNotificationsEditMode = !cardStates.mobileNotificationsEditMode;
+                        }
+                        
                         renderUserProfile();
                         return; 
                     }
@@ -1117,22 +1174,12 @@
                         const cardId = cardHeader.dataset.cardId;
                         if (!cardId) return; 
                         
-                        let collapseIcon;
-                        if (cardId === 'accountSwitcherCard') {
-                            collapseIcon = e.target.closest('.collapse-icon');
+                        const collapseIcon = e.target.closest('.collapse-icon');
+                        // For cards with edit buttons, only collapse if the collapse icon is clicked
+                        if (cardId === 'accountSwitcherCard' || cardId === 'mobileNotificationsCard') {
                             if (!collapseIcon) {
-                                // If click was not on collapse icon (and not on edit button), do nothing
-                                return;
+                                return; // Click was not on collapse icon, so do nothing
                             }
-                        } else {
-                            // For other cards, the whole header is clickable
-                            collapseIcon = cardHeader.querySelector('i[data-lucide]');
-                        }
-                        
-                        const action = cardHeader.querySelector('.card-action');
-                        if (cardId !== 'accountSwitcherCard' && action && action.querySelector('i[data-lucide="edit"]')) {
-                            console.log("Edit card clicked, not collapsing.");
-                            return; 
                         }
                         
                         const cardStateKey = cardId.replace('Card', ''); 
@@ -1150,28 +1197,35 @@
                             if (isCollapsing && card && card.id === 'accountSwitcherCard') {
                                 summary.innerHTML = buildSummaryList();
                                 lucide.createIcons(); 
-                                cardStates.accountSwitcherEditMode = false; 
+                                cardStates.accountSwitcherEditMode = false; // Reset edit mode on collapse
+                            }
+                            if (isCollapsing && card && card.id === 'mobileNotificationsCard') {
+                                cardStates.mobileNotificationsEditMode = false; // Reset edit mode on collapse
                             }
 
                             content.classList.toggle('collapsed', isCollapsing);
                             summary.classList.toggle('hidden', !isCollapsing);
                             cardHeader.classList.toggle('no-border', isCollapsing && !summary.innerHTML.trim()); 
                             
-                            const icon = cardHeader.querySelector(cardId === 'accountSwitcherCard' ? '.collapse-icon' : 'i[data-lucide]');
+                            const icon = cardHeader.querySelector('.collapse-icon');
                             if (icon) { 
                                 icon.setAttribute('data-lucide', isCollapsing ? 'plus' : 'minus');
                             }
                             
-                            if (cardId === 'accountSwitcherCard') {
-                                const editBtn = cardHeader.querySelector('[data-action="toggle-edit-account-switcher"]');
-                                if (editBtn) {
-                                    editBtn.classList.toggle('hidden', isCollapsing);
-                                    if (isCollapsing) { // If collapsing, reset edit mode
-                                        cardStates.accountSwitcherEditMode = false;
-                                    } else { // If expanding
-                                        // We must re-render to get the correct button state
-                                        renderUserProfile();
-                                    }
+                            // Handle visibility of edit buttons on collapse/expand
+                            const editBtn = cardHeader.querySelector('[data-action]');
+                            if (editBtn) {
+                                // Find the button itself, not the container
+                                const btn = editBtn.closest('button');
+                                if (btn) {
+                                    btn.classList.toggle('hidden', isCollapsing);
+                                }
+                                if (isCollapsing) { // If collapsing, reset edit mode
+                                    if(cardId === 'accountSwitcherCard') cardStates.accountSwitcherEditMode = false;
+                                    if(cardId === 'mobileNotificationsCard') cardStates.mobileNotificationsEditMode = false;
+                                } else { // If expanding
+                                    // We must re-render to get the correct button state
+                                    renderUserProfile();
                                 }
                             }
                             lucide.createIcons();
@@ -1311,11 +1365,9 @@
                     
                     <h5 class="font-bold text-gray-300">User Details</h5>
                     <p><span class="font-semibold text-gray-400">Full Name:</span> ${user.fName} ${user.lName}</p>
-                    <p><span class="font-semibold text-gray-400">Username:</span> ${user.name}</p>
                     <p><span class="font-semibold text-gray-400">Login Email:</span> ${user.email}</p>
-                    <p><span class="font-semibold text-gray-400">Contact Email:</span> ${user.contactEmail}</p>
                     <p><span class="font-semibold text-gray-400">Contact Phone:</span> ${user.phone}</p>
-                    <p><span class="font-semibold text-gray-400">Alt. Phone:</span> ${user.altPhone || 'N/A'}</p>
+                    <p><span class="font-semibold text-gray-400">Contact Email:</span> ${user.contactEmail}</p>
                     <p><span class="font-semibold text-gray-400">Admin Level:</span> ${user.adminAuthorityLevel}</p>
 
                     <div class="mt-2 pt-2 border-t border-gray-600">
@@ -1323,8 +1375,8 @@
                         <p><span class="font-semibold text-gray-400">Location:</span> ${user.location}</p>
                         <p><span class="font-semibold text-gray-400">Office:</span> ${user.officeCode}</p>
                         <p><span class="font-semibold text-gray-400">MC/DOT:</span> ${user.mcDotNumber}</p>
-                        <p><span class="font-semibold text-gray-400">Subscriptions:</span> ${user.subscriptions}</p>
-                        ${capabilitiesHTML} <!--- NEW ---
+                        <p><span class="font-semibold text-gray-400">Subscription:</span> ${user.subscriptions}</p>
+                        ${capabilitiesHTML}
                     </div>
 
                     ${userNotesHTML}
@@ -1349,13 +1401,13 @@
             }
 
             accountTooltip.style.top = `${topPosition}px`;
-            if (accountTooltip) accountTooltip.classList.remove('hidden');
+            accountTooltip.classList.remove('hidden');
         }
 
         function hideTooltip() {
-            if (accountTooltip) accountTooltip.classList.add('hidden');
+            accountTooltip.classList.add('hidden');
         }
-
+        
     </script>
 </body>
 </html>
