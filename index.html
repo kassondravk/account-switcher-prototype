@@ -858,7 +858,7 @@
                     ${isAccountSwitcherEditMode ? `
                     <div class="m3-text-field ${!globalDisplayPrefs.adminNotes ? 'disabled' : ''} ${currentUser.adminNotes ? 'filled' : ''}">
                         <label for="adminNotesInput">Admin Notes</label>
-                        <textarea id="adminNotesInput" class="text-sm" ${!globalDisplayPrefs.adminNotes || !currentUser.isAdmin ? 'disabled' : ''}>${currentUser.adminNotes || ''}</textarea>
+                        <textarea id="adminNotesInput" class="text-sm" ${!globalDisplayPrefs.adminNotes ? 'disabled' : ''}>${currentUser.adminNotes || ''}</textarea>
                     </div>
                     <p class="text-xs text-gray-500 ml-1">This field is set by account Administrators and is visible to all users.</p>
                     ` : ''}
@@ -1120,7 +1120,7 @@
                     if (targetId === 'userNotesInput') {
                         userToUpdate.userNotes = value;
                         currentUser.userNotes = value;
-                    } else if (targetId === 'adminNotesInput' && currentUser.isAdmin) {
+                    } else if (targetId === 'adminNotesInput') { // Removed isAdmin check
                         userToUpdate.adminNotes = value;
                         currentUser.adminNotes = value;
                     } else if (targetId === 'mobileNumberInput') {
