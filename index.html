@@ -286,10 +286,10 @@
 <body class="bg-white">
 
     <!-- Main App View -->
-    <div id="mainAppView" class="flex">
+    <div id="mainAppView" class="hidden flex w-full"> <!-- ADDED hidden -->
         <div class="relative flex">
             <!-- Main navigation container -->
-            <div id="mainNavContainer" class="w-20 h-screen pt-6 bg-Web-Fill-Navigation-Default flex flex-col items-center">
+            <div id="mainNavContainer" class="w-20 h-screen pt-6 bg-Web-Fill-Navigation-Default flex flex-col items-center flex-shrink-0">
                 <!-- Nav content is rendered here by JS -->
             </div>
 
@@ -316,14 +316,134 @@
                 <div class="border-t border-gray-700 py-2"><a href="#" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Log Out</a></div>
             </div>
         </div>
+        
+        <!-- Placeholder Dashboard Content -->
+        <main class="flex-1 h-screen overflow-y-auto bg-gray-100 p-6">
+            <div class="max-w-7xl mx-auto">
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-600">Equipment Type</span>
+                        <div class="w-32 bg-white border border-gray-300 rounded px-3 py-1 text-sm">
+                            Van <i data-lucide="chevron-down" class="w-4 h-4 inline float-right mt-1"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <!-- Main Content -->
+                    <div class="flex-grow space-y-6">
+                        <!-- Stats Cards -->
+                        <div>
+                            <p class="text-sm text-gray-600">National Rate</p>
+                            <p class="text-xs text-gray-400 mb-3">Updated 11/10/2025</p>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <!-- Broker Spot Rate -->
+                                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                                    <p class="text-sm text-gray-500 mb-1">Broker Spot Rate</p>
+                                    <p class="text-3xl font-bold text-gray-900">$1.65</p>
+                                    <p class="text-sm text-red-500"><i data-lucide="arrow-down" class="w-4 h-4 inline"></i> (-$0.02)</p>
+                                    <p class="text-xs text-gray-400 mt-2">Rate is decreasing</p>
+                                </div>
+                                <!-- Shipper Spot Rate -->
+                                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                                    <p class="text-sm text-gray-500 mb-1">Shipper Spot Rate</p>
+                                    <p class="text-3xl font-bold text-gray-900">$1.90</p>
+                                    <p class="text-sm text-red-500"><i data-lucide="arrow-down" class="w-4 h-4 inline"></i> (-$0.00)</p>
+                                    <p class="text-xs text-gray-400 mt-2">Rate is decreasing</p>
+                                </div>
+                                <!-- Shipper Contract Rate -->
+                                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                                    <p class="text-sm text-gray-500 mb-1">Shipper Contract Rate</p>
+                                    <p class="text-3xl font-bold text-gray-900">$1.87</p>
+                                    <p class="text-sm text-red-500"><i data-lucide="arrow-down" class="w-4 h-4 inline"></i> (-$0.14)</p>
+                                    <p class="text-xs text-gray-400 mt-2">Rate is decreasing</p>
+                                </div>
+                                <!-- Fuel Surcharge -->
+                                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                                    <p class="text-sm text-gray-500 mb-1">Fuel Surcharge</p>
+                                    <p class="text-3xl font-bold text-gray-900">$0.42</p>
+                                    <p class="text-sm text-gray-500">($0.00)</p>
+                                    <p class="text-xs text-gray-400 mt-2">Rate is neutral</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chart Placeholder -->
+                        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                            <div class="flex justify-end space-x-4 mb-4">
+                                <span class="text-sm text-gray-500">Timeframe</span>
+                                <span class="text-sm text-blue-600 font-medium">3M</span>
+                                <span class="text-sm text-gray-500">6M</span>
+                                <span class="text-sm text-gray-500">1Y</span>
+                            </div>
+                            <div class="h-80 bg-gray-100 rounded flex items-center justify-center">
+                                <p class="text-gray-400">[Chart Placeholder]</p>
+                            </div>
+                            <div class="flex justify-center space-x-6 mt-4 text-xs text-gray-600">
+                                <span><i data-lucide="square" class="w-3 h-3 inline text-blue-500 fill-blue-500"></i> Broker Spot</span>
+                                <span><i data-lucide="square" class="w-3 h-3 inline text-red-500 fill-red-500"></i> Shipper Contract</span>
+                                <span><i data-lucide="square" class="w-3 h-3 inline text-yellow-500 fill-yellow-500"></i> Shipper Spot</span>
+                                <!-- ... more legend items -->
+                            </div>
+                        </div>
+
+                        <!-- Market Overview Placeholder -->
+                        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                            <h2 class="text-xl font-semibold text-gray-900 mb-4">Market Overview</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="h-64 bg-gray-100 rounded flex items-center justify-center">
+                                    <p class="text-gray-400">[Map Placeholder]</p>
+                                </div>
+                                <div class="h-64 bg-gray-100 rounded flex items-center justify-center">
+                                    <p class="text-gray-400">[Top 5 National Lanes Placeholder]</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sidebar -->
+                    <div class="w-full lg:w-72 flex-shrink-0 space-y-6">
+                        <!-- State and Regional Downloads -->
+                        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">State and Regional Downloads</h3>
+                            <p class="text-xs text-gray-500 mb-4">Timeframe: 30 Day (With DAT fuel surcharge $0.42)</p>
+                            <div class="space-y-3">
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-700 mb-1">State</h4>
+                                    <a href="#" class="text-sm text-blue-600 flex items-center"><i data-lucide="download" class="w-4 h-4 mr-2"></i> BROKER SPOT</a>
+                                    <a href="#" class="text-sm text-blue-600 flex items-center mt-1"><i data-lucide="download" class="w-4 h-4 mr-2"></i> SHIPPER SPOT</a>
+                                    <a href="#" class="text-sm text-blue-600 flex items-center mt-1"><i data-lucide="download" class="w-4 h-4 mr-2"></i> SHIPPER CONTRACT</a>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-700 mb-1">Regional</h4>
+                                    <a href="#" class="text-sm text-blue-600 flex items-center"><i data-lucide="download" class="w-4 h-4 mr-2"></i> BROKER SPOT</a>
+                                    <a href="#" class="text-sm text-blue-600 flex items-center mt-1"><i data-lucide="download" class="w-4 h-4 mr-2"></i> SHIPPER SPOT</a>
+                                    <a href="#" class="text-sm text-blue-600 flex items-center mt-1"><i data-lucide="download" class="w-4 h-4 mr-2"></i> SHIPPER CONTRACT</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- DAT Weekly Update -->
+                        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">DAT Weekly Update</h3>
+                            <div class="aspect-video bg-gray-900 rounded-lg flex items-center justify-center">
+                                <p class="text-white">[Video Placeholder]</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <!-- User Profile View (Initially Hidden) -->
-    <div id="userProfileView" class="hidden w-full h-screen">
+    <!-- User Profile View -->
+    <div id="userProfileView" class="w-full h-screen"> <!-- REMOVED hidden -->
         <!-- Added relative positioning -->
         <div class="flex h-full relative">
             <!-- Profile Navigation -->
-            <div class="w-64 h-full bg-Web-Fill-Navigation-Default text-white flex flex-col">
+            <div class="w-64 h-full bg-Web-Fill-Navigation-Default text-white flex flex-col flex-shrink-0">
                 <!-- Logo/Back Button -->
                 <div id="backToApp" class="px-6 py-4 border-b border-gray-700 cursor-pointer flex items-center space-x-2">
                     <div class="text-2xl font-bold flex items-center">
@@ -524,7 +644,8 @@
         function getNavElements() {
              return {
                 mainNavContainer: document.getElementById('mainNavContainer'),
-                avatarButton: document.getElementById('avatarButton')
+                avatarButton: document.getElementById('avatarButton'),
+                logoButton: document.getElementById('logoButton') // --- ADDED ---
              };
         }
 
@@ -573,7 +694,7 @@
                 // Check against all relevant user fields
                 return (
                     user.name.toLowerCase().includes(lowercasedTerm) ||
-                    user.platform.toLowerCase().includes(lowercasedTerm) ||
+                    // user.platform.toLowerCase().includes(lowercasedTerm) || // --- REMOVED ---
                     user.company.toLowerCase().includes(lowercasedTerm) ||
                     user.location.toLowerCase().includes(lowercasedTerm) ||
                     user.officeCode.toLowerCase().includes(lowercasedTerm) ||
@@ -581,15 +702,15 @@
                     user.lName.toLowerCase().includes(lowercasedTerm) ||
                     user.email.toLowerCase().includes(lowercasedTerm) ||
                     user.phone.toLowerCase().includes(lowercasedTerm) ||
-                    user.altPhone.toLowerCase().includes(lowercasedTerm) || // --- ADDED ---
-                    user.contactEmail.toLowerCase().includes(lowercasedTerm) || // --- ADDED ---
+                    user.altPhone.toLowerCase().includes(lowercasedTerm) || 
+                    user.contactEmail.toLowerCase().includes(lowercasedTerm) || 
                     user.initials.toLowerCase().includes(lowercasedTerm) ||
                     (user.userNotes && user.userNotes.toLowerCase().includes(lowercasedTerm)) ||
                     user.mcDotNumber.toLowerCase().includes(lowercasedTerm) ||
                     (user.adminNotes && user.adminNotes.toLowerCase().includes(lowercasedTerm)) ||
                     (user.adminAuthorityLevel && user.adminAuthorityLevel.toLowerCase().includes(lowercasedTerm)) ||
-                    (user.subscriptions && user.subscriptions.toLowerCase().includes(lowercasedTerm)) || // --- UPDATED ---
-                    (user.capabilities && user.capabilities.join(', ').toLowerCase().includes(lowercasedTerm)) // --- NEW ---
+                    (user.subscriptions && user.subscriptions.toLowerCase().includes(lowercasedTerm)) || 
+                    (user.capabilities && user.capabilities.join(', ').toLowerCase().includes(lowercasedTerm)) 
                 );
             });
         }
@@ -678,7 +799,7 @@
             `;
             
             mainNavContainer.innerHTML = navItems + `<div class="self-stretch mt-auto flex flex-col items-center"><div class="py-4"><div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center cursor-pointer"><i data-lucide="help-circle" class="w-6 h-6 stroke-white"></i></div></div><div class="self-stretch border-t border-Web-Border-Container-Primary flex justify-center py-4"><div id="avatarButton" class="w-10 h-10 ${currentUser.color} rounded-full flex items-center justify-center text-white text-sm font-medium cursor-pointer">${currentUser.initials}</div></div></div>`;
-            mainNavContainer.className = `h-screen pt-6 bg-Web-Fill-Navigation-Default flex flex-col items-center ${isOne ? 'w-64' : 'w-20'}`;
+            mainNavContainer.className = `h-screen pt-6 bg-Web-Fill-Navigation-Default flex flex-col items-center flex-shrink-0 ${isOne ? 'w-64' : 'w-20'}`;
             
             lucide.createIcons();
         }
@@ -986,6 +1107,12 @@
         // --- Event Listeners ---
         document.addEventListener('DOMContentLoaded', () => { 
             updateUI(); 
+            // --- FIX: Need to render the profile on first load ---
+            const { mainAppView, userProfileView } = getAppElements();
+            if (userProfileView && !userProfileView.classList.contains('hidden')) {
+                renderUserProfile();
+            }
+            // --- END FIX ---
             lucide.createIcons();
             
             // --- MAIN APP LISTENERS (only need to be added once) ---
@@ -993,6 +1120,7 @@
             if (mainNavContainer) {
                 mainNavContainer.addEventListener('click', (e) => {
                     const avatarButton = e.target.closest('#avatarButton');
+                    const logoButton = e.target.closest('#logoButton'); // --- ADDED ---
                     const navItem = e.target.closest('.nav-item');
 
                     if (avatarButton) {
@@ -1004,6 +1132,13 @@
                         const { accountMenu } = getAppElements();
                         if (accountMenu) accountMenu.classList.toggle('hidden');
                     } 
+                    // --- NEW: Close pop-out on logo click ---
+                    else if (logoButton) {
+                        e.stopPropagation();
+                        const { accountMenu } = getAppElements();
+                        if (accountMenu) accountMenu.classList.add('hidden');
+                        // Add any other logic for logo click here (e.g., go to dashboard)
+                    }
                     else if (navItem && navItem.parentElement.id === 'navContainer') {
                         // Handle nav item selection for iQ style nav
                         const currentSelected = mainNavContainer.querySelector('.nav-item[data-selected="true"]');
@@ -1024,13 +1159,13 @@
             }
             if (accountList) {
                 accountList.addEventListener('click', (e) => {
+                    e.stopPropagation(); // --- ADDED ---
                     const accountItem = e.target.closest('.account-item');
                     if(accountItem) {
                         const userId = parseInt(accountItem.dataset.userId);
                         currentUser = users.find(u => u.id === userId) || currentUser;
                         updateUI();
-                        const { accountMenu } = getAppElements();
-                        if (accountMenu) accountMenu.classList.add('hidden');
+                        // --- REMOVED: accountMenu.classList.add('hidden'); ---
                     }
                 });
                 accountList.addEventListener('mouseover', showTooltip);
@@ -1047,7 +1182,7 @@
             const { 
                 profileAccountInfoLink, backToApp, toolsLink, showMoreAccountsButton, 
                 profileAccountList, profileAccountSearchInput, profileContent, 
-                profileNavLinks, userProfileView 
+                profileNavLinks
             } = getProfileElements();
 
             if (profileAccountInfoLink) {
@@ -1059,8 +1194,10 @@
             if (backToApp) { 
                 backToApp.addEventListener('click', () => { 
                     const { userProfileView, mainAppView } = getAppElements();
+                    const { profileAccountMenu } = getProfileElements(); // --- ADDED ---
                     if(userProfileView) userProfileView.classList.add('hidden'); 
                     if(mainAppView) mainAppView.classList.remove('hidden'); 
+                    if(profileAccountMenu) profileAccountMenu.classList.add('hidden'); // --- ADDED ---
                 }); 
             }
             if (toolsLink) { 
@@ -1088,14 +1225,14 @@
             }
             if (profileAccountList) {
                 profileAccountList.addEventListener('click', (e) => {
+                    e.stopPropagation(); // --- ADDED ---
                     const accountItem = e.target.closest('.account-item');
                     if(accountItem) {
                         const userId = parseInt(accountItem.dataset.userId);
                         currentUser = users.find(u => u.id === userId) || currentUser;
                         renderUserProfile(); // Rerender profile page with new user data
                         updateUI();
-                        const { profileAccountMenu } = getProfileElements();
-                        if (profileAccountMenu) profileAccountMenu.classList.add('hidden');
+                        // --- REMOVED: profileAccountMenu.classList.add('hidden'); ---
                     }
                 });
                 profileAccountList.addEventListener('mouseover', showTooltip);
@@ -1384,24 +1521,28 @@
                 </div>
             `;
 
+            // --- REPOSITION LOGIC ---
+            accountTooltip.classList.remove('hidden'); // Show it first to measure
+            
             // Position tooltip
             const rect = target.getBoundingClientRect();
-            accountTooltip.style.left = `${rect.right + 10}px`;
-            
-            // Adjust vertical position to prevent overflow
             const tooltipHeight = accountTooltip.offsetHeight;
             const windowHeight = window.innerHeight;
+            
+            accountTooltip.style.left = `${rect.right + 10}px`;
+            
             let topPosition = rect.top;
 
             if (topPosition + tooltipHeight > windowHeight - 20) { // 20px buffer
+                // It overflows the bottom, align to bottom of window
                 topPosition = windowHeight - tooltipHeight - 20;
             }
             if (topPosition < 20) {
+                // It overflows the top
                 topPosition = 20;
             }
 
             accountTooltip.style.top = `${topPosition}px`;
-            accountTooltip.classList.remove('hidden');
         }
 
         function hideTooltip() {
