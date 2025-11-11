@@ -689,29 +689,34 @@
             if (!searchTerm) {
                 return users; // Return all users if search term is empty
             }
-            const lowercasedTerm = searchTerm.toLowerCase();
+            
+            // --- NEW: Multi-field search ---
+            const searchTerms = searchTerm.toLowerCase().split(',').map(term => term.trim()).filter(term => term.length > 0);
+            
             return users.filter(user => {
-                // Check against all relevant user fields
-                return (
-                    user.name.toLowerCase().includes(lowercasedTerm) ||
-                    // user.platform.toLowerCase().includes(lowercasedTerm) || // --- REMOVED ---
-                    user.company.toLowerCase().includes(lowercasedTerm) ||
-                    user.location.toLowerCase().includes(lowercasedTerm) ||
-                    user.officeCode.toLowerCase().includes(lowercasedTerm) ||
-                    user.fName.toLowerCase().includes(lowercasedTerm) ||
-                    user.lName.toLowerCase().includes(lowercasedTerm) ||
-                    user.email.toLowerCase().includes(lowercasedTerm) ||
-                    user.phone.toLowerCase().includes(lowercasedTerm) ||
-                    user.altPhone.toLowerCase().includes(lowercasedTerm) || 
-                    user.contactEmail.toLowerCase().includes(lowercasedTerm) || 
-                    user.initials.toLowerCase().includes(lowercasedTerm) ||
-                    (user.userNotes && user.userNotes.toLowerCase().includes(lowercasedTerm)) ||
-                    user.mcDotNumber.toLowerCase().includes(lowercasedTerm) ||
-                    (user.adminNotes && user.adminNotes.toLowerCase().includes(lowercasedTerm)) ||
-                    (user.adminAuthorityLevel && user.adminAuthorityLevel.toLowerCase().includes(lowercasedTerm)) ||
-                    (user.subscriptions && user.subscriptions.toLowerCase().includes(lowercasedTerm)) || 
-                    (user.capabilities && user.capabilities.join(', ').toLowerCase().includes(lowercasedTerm)) 
-                );
+                // Create a single string of all searchable content
+                const userContent = [
+                    user.name,
+                    user.company,
+                    user.location,
+                    user.officeCode,
+                    user.fName,
+                    user.lName,
+                    user.email,
+                    user.phone,
+                    user.altPhone,
+                    user.contactEmail,
+                    user.initials,
+                    user.userNotes,
+                    user.mcDotNumber,
+                    user.adminNotes,
+                    user.adminAuthorityLevel,
+                    user.subscriptions,
+                    user.capabilities.join(', ')
+                ].join(' ').toLowerCase();
+
+                // Check if *all* search terms are present in the content
+                return searchTerms.every(term => userContent.includes(term));
             });
         }
         
